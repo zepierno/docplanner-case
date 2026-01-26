@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expansion Pipeline | Docplanner Business Case</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dp-teal': '#00b39b',
+                        'dp-teal-light': '#e5faf8',
+                        'dp-teal-dark': '#009681',
+                        'dp-blue': '#3d83df',
+                        'dp-gray': '#747474',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        html { scroll-behavior: smooth; }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #00b39b 0%, #3d83df 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .slide-in-left {
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .slide-in-left.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .slide-in-right {
+            opacity: 0;
+            transform: translateX(50px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .slide-in-right.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .scale-in {
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .scale-in.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .nav-dot {
+            transition: all 0.3s ease;
+        }
+        
+        .nav-dot.active {
+            background-color: #00b39b;
+            transform: scale(1.3);
+        }
+        
+        .hero-bg {
+            background: linear-gradient(135deg, #f0fdfb 0%, #e0f7fa 50%, #e8f4fd 100%);
+        }
+        
+        .problem-bg {
+            background: linear-gradient(180deg, #fff5f5 0%, #ffffff 100%);
+        }
+        
+        .solution-bg {
+            background: linear-gradient(180deg, #f0fdfb 0%, #ffffff 100%);
+        }
+        
+        .triggers-bg {
+            background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+        }
+        
+        .counter {
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .flow-line {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw 2s ease forwards;
+        }
+        
+        @keyframes draw {
+            to { stroke-dashoffset: 0; }
+        }
+        
+        .ticket-card {
+            transition: all 0.3s ease;
+        }
+        
+        .ticket-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .trigger-card {
+            transition: all 0.3s ease;
+        }
+        
+        .trigger-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 179, 155, 0.15);
+        }
+        
+        .mockup-frame {
+            box-shadow: 0 25px 80px rgba(0,0,0,0.15);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-800">
+    
+    <!-- Navigation Dots -->
+    <nav class="fixed right-6 top-1/2 transform -translate-y-1/2 z-50 hidden lg:flex flex-col gap-3">
+        <a href="#hero" class="nav-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-dp-teal" data-section="hero"></a>
+        <a href="#problem" class="nav-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-dp-teal" data-section="problem"></a>
+        <a href="#insight" class="nav-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-dp-teal" data-section="insight"></a>
+        <a href="#solution" class="nav-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-dp-teal" data-section="solution"></a>
+        <a href="#how-it-works" class="nav-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-dp-teal" data-section="how-it-works"></a>
+        <a href="#triggers" class="nav-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-dp-teal" data-section="triggers"></a>
+        <a href="#ai-logic" class="nav-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-dp-teal" data-section="ai-logic"></a>
+        <a href="#scale" class="nav-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-dp-teal" data-section="scale"></a>
+        <a href="#impact" class="nav-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-dp-teal" data-section="impact"></a>
+        <a href="#demo" class="nav-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-dp-teal" data-section="demo"></a>
+    </nav>
+
+    <!-- Section 1: Hero -->
+    <section id="hero" class="min-h-screen hero-bg flex items-center justify-center relative overflow-hidden">
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute -top-40 -right-40 w-96 h-96 bg-dp-teal/10 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-dp-blue/10 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div class="container mx-auto px-6 text-center relative z-10">
+            <div class="fade-in">
+                <p class="text-dp-teal font-semibold tracking-wider uppercase mb-4">Business Case Presentation</p>
+                <h1 class="text-5xl md:text-7xl font-bold mb-6">
+                    <span class="gradient-text">Expansion Pipeline</span>
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-8">
+                    Turning Support Conversations into Revenue Opportunities
+                </p>
+                <div class="flex items-center justify-center gap-3 text-gray-500 mb-12">
+                    <span>Docplanner</span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-dp-teal"></span>
+                    <span>Customer Care × Sales</span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-dp-teal"></span>
+                    <span>AI-Powered</span>
+                </div>
+            </div>
+            
+            <div class="fade-in" style="transition-delay: 0.3s;">
+                <a href="#problem" class="inline-flex items-center gap-2 bg-dp-teal text-white px-8 py-4 rounded-full font-semibold hover:bg-dp-teal-dark transition-colors">
+                    Start the Journey
+                    <svg class="w-5 h-5 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: The Problem -->
+    <section id="problem" class="min-h-screen problem-bg flex items-center py-20">
+        <div class="container mx-auto px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-16 fade-in">
+                    <p class="text-red-500 font-semibold tracking-wider uppercase mb-4">The Problem</p>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6">We're Closing the Door on<br><span class="text-red-500">Interested Buyers</span></h2>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="slide-in-left">
+                        <div class="bg-white rounded-2xl p-8 shadow-xl border border-red-100">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                                    <span class="text-3xl">📩</span>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-sm">Weekly Support Tickets</p>
+                                    <p class="text-4xl font-bold text-red-500 counter">~3,000</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-4">Tagged as <span class="font-semibold">"Feature Request"</span> or <span class="font-semibold">"How to do X?"</span></p>
+                            <p class="text-gray-500 text-sm">Regarding video and telemedicine capabilities</p>
+                        </div>
+                        
+                        <div class="mt-6 bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                            <p class="text-gray-500 text-sm mb-2">Current Agent Response:</p>
+                            <div class="bg-gray-50 rounded-lg p-4 border-l-4 border-red-400">
+                                <p class="text-gray-700 italic">"Sorry, that feature isn't available on your current plan."</p>
+                            </div>
+                            <div class="mt-3 flex items-center gap-2 text-red-500 text-sm font-medium">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                </svg>
+                                Ticket Closed
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="slide-in-right">
+                        <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-8 text-white">
+                            <h3 class="text-2xl font-bold mb-6">The Gap</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-2xl">💰</span>
+                                    <p>We are treating <span class="font-bold">Buying Signals</span> as <span class="font-bold">Support Noise</span></p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-2xl">🚪</span>
+                                    <p>Literally <span class="font-bold">closing the door</span> on customers ready to upgrade</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-2xl">🔌</span>
+                                    <p><span class="font-bold">Support and Sales</span> are completely disconnected</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-8 pt-6 border-t border-white/20">
+                                <p class="text-red-100 text-sm">Estimated Annual Revenue Loss</p>
+                                <p class="text-3xl font-bold">€ [TBD]</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: The Insight -->
+    <section id="insight" class="min-h-screen bg-white flex items-center py-20">
+        <div class="container mx-auto px-6">
+            <div class="max-w-5xl mx-auto text-center">
+                <div class="fade-in">
+                    <p class="text-dp-teal font-semibold tracking-wider uppercase mb-4">The Key Insight</p>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-8">
+                        Support Conversations<br>
+                        <span class="gradient-text">Already Contain Expansion Intent</span>
+                    </h2>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-6 mt-12">
+                    <div class="ticket-card bg-white rounded-xl p-6 shadow-lg border border-gray-100 text-left fade-in" style="transition-delay: 0.1s;">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="w-2 h-2 rounded-full bg-dp-teal"></span>
+                            <span class="text-xs text-gray-500">CS-12847</span>
+                        </div>
+                        <p class="text-gray-700 mb-4">"I'm trying to do a <span class="bg-yellow-100 px-1 font-medium">video call</span> with a patient but I <span class="bg-yellow-100 px-1 font-medium">can't find the button</span>..."</p>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="bg-dp-teal/10 text-dp-teal px-2 py-1 rounded font-medium">Expansion Signal</span>
+                        </div>
+                    </div>
+                    
+                    <div class="ticket-card bg-white rounded-xl p-6 shadow-lg border border-gray-100 text-left fade-in" style="transition-delay: 0.2s;">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="w-2 h-2 rounded-full bg-dp-teal"></span>
+                            <span class="text-xs text-gray-500">CS-12848</span>
+                        </div>
+                        <p class="text-gray-700 mb-4">"We need <span class="bg-yellow-100 px-1 font-medium">telemedicine capabilities</span> for our <span class="bg-yellow-100 px-1 font-medium">127 practitioners</span>..."</p>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="bg-purple-100 text-purple-700 px-2 py-1 rounded font-medium">Enterprise Opportunity</span>
+                        </div>
+                    </div>
+                    
+                    <div class="ticket-card bg-white rounded-xl p-6 shadow-lg border border-gray-100 text-left fade-in" style="transition-delay: 0.3s;">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="w-2 h-2 rounded-full bg-dp-teal"></span>
+                            <span class="text-xs text-gray-500">CS-12853</span>
+                        </div>
+                        <p class="text-gray-700 mb-4">"Is there a way to <span class="bg-yellow-100 px-1 font-medium">record consultations</span>? Our patients have been asking..."</p>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="bg-dp-teal/10 text-dp-teal px-2 py-1 rounded font-medium">Expansion Signal</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-16 fade-in" style="transition-delay: 0.4s;">
+                    <div class="inline-flex items-center gap-4 bg-dp-teal-light rounded-full px-8 py-4">
+                        <span class="text-2xl">💡</span>
+                        <p class="text-dp-teal-dark font-medium">The gap is <span class="font-bold">process and decision logic</span>, not product or agents</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: The Solution -->
+    <section id="solution" class="min-h-screen solution-bg flex items-center py-20">
+        <div class="container mx-auto px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-16 fade-in">
+                    <p class="text-dp-teal font-semibold tracking-wider uppercase mb-4">The Solution</p>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6">
+                        AI-Powered<br><span class="gradient-text">Expansion Pipeline</span>
+                    </h2>
+                    <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                        An automated system that detects expansion signals, resolves customer confusion, and converts interest into revenue.
+                    </p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8 mt-12">
+                    <div class="scale-in" style="transition-delay: 0.1s;">
+                        <div class="bg-white rounded-2xl p-8 shadow-lg border border-dp-teal/20 h-full">
+                            <div class="w-14 h-14 bg-dp-teal/10 rounded-xl flex items-center justify-center mb-6">
+                                <span class="text-3xl">🏪</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3">Small Clinics</h3>
+                            <p class="text-gray-600 mb-4">Automated soft-sell flow with intelligent messaging</p>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-dp-teal" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    Instant, helpful response
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-dp-teal" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    Contextual value proposition
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-dp-teal" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    Self-service upgrade path
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="scale-in" style="transition-delay: 0.2s;">
+                        <div class="bg-white rounded-2xl p-8 shadow-lg border border-purple-200 h-full">
+                            <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+                                <span class="text-3xl">🏢</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3">Enterprise Clinics</h3>
+                            <p class="text-gray-600 mb-4">Sales-assisted flow with automatic lead creation</p>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    Auto-create qualified Lead
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    Route to Enterprise Sales
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    Full context handoff
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-12 text-center fade-in" style="transition-delay: 0.3s;">
+                    <div class="inline-flex items-center gap-3 bg-white rounded-full px-6 py-3 shadow-md border border-gray-100">
+                        <span class="text-xl">🎯</span>
+                        <p class="text-gray-700"><span class="font-semibold">Principle:</span> Help first. Sell second.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 5: How It Works -->
+    <section id="how-it-works" class="min-h-screen bg-white flex items-center py-20">
+        <div class="container mx-auto px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-16 fade-in">
+                    <p class="text-dp-teal font-semibold tracking-wider uppercase mb-4">Architecture</p>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6">How It Works</h2>
+                    <p class="text-xl text-gray-600">From Support Ticket to Expansion Opportunity</p>
+                </div>
+                
+                <div class="relative">
+                    <!-- Flow Steps -->
+                    <div class="grid md:grid-cols-5 gap-4">
+                        <div class="fade-in text-center" style="transition-delay: 0.1s;">
+                            <div class="w-16 h-16 mx-auto bg-dp-teal/10 rounded-2xl flex items-center justify-center mb-4">
+                                <span class="text-2xl">📞</span>
+                            </div>
+                            <h4 class="font-semibold mb-2">1. Contact</h4>
+                            <p class="text-sm text-gray-500">Customer reaches support via phone, chat, WhatsApp, or email</p>
+                        </div>
+                        
+                        <div class="fade-in text-center" style="transition-delay: 0.2s;">
+                            <div class="w-16 h-16 mx-auto bg-dp-blue/10 rounded-2xl flex items-center justify-center mb-4">
+                                <span class="text-2xl">📋</span>
+                            </div>
+                            <h4 class="font-semibold mb-2">2. Case Created</h4>
+                            <p class="text-sm text-gray-500">Ticket enters Salesforce Service Cloud</p>
+                        </div>
+                        
+                        <div class="fade-in text-center" style="transition-delay: 0.3s;">
+                            <div class="w-16 h-16 mx-auto bg-purple-100 rounded-2xl flex items-center justify-center mb-4">
+                                <span class="text-2xl">🤖</span>
+                            </div>
+                            <h4 class="font-semibold mb-2">3. AI Intercept</h4>
+                            <p class="text-sm text-gray-500">Before agent assignment, AI analyzes and classifies intent</p>
+                        </div>
+                        
+                        <div class="fade-in text-center" style="transition-delay: 0.4s;">
+                            <div class="w-16 h-16 mx-auto bg-amber-100 rounded-2xl flex items-center justify-center mb-4">
+                                <span class="text-2xl">⚡</span>
+                            </div>
+                            <h4 class="font-semibold mb-2">4. Smart Routing</h4>
+                            <p class="text-sm text-gray-500">System routes based on intent + customer profile</p>
+                        </div>
+                        
+                        <div class="fade-in text-center" style="transition-delay: 0.5s;">
+                            <div class="w-16 h-16 mx-auto bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
+                                <span class="text-2xl">✨</span>
+                            </div>
+                            <h4 class="font-semibold mb-2">5. Action</h4>
+                            <p class="text-sm text-gray-500">Auto soft-sell or Sales handoff based on clinic size</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Routing Diagram -->
+                    <div class="mt-16 bg-gray-50 rounded-2xl p-8 fade-in" style="transition-delay: 0.6s;">
+                        <h4 class="font-semibold text-center mb-8">AI Classification & Routing</h4>
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="bg-blue-50 rounded-xl p-5 border border-blue-200">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <span class="text-xl">📚</span>
+                                    <span class="font-semibold text-blue-700">Training Issue</span>
+                                </div>
+                                <p class="text-sm text-gray-600">→ Send tutorial/guide</p>
+                                <p class="text-sm text-gray-600">→ Route to Support</p>
+                            </div>
+                            
+                            <div class="bg-red-50 rounded-xl p-5 border border-red-200">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <span class="text-xl">🐛</span>
+                                    <span class="font-semibold text-red-700">Bug / Technical</span>
+                                </div>
+                                <p class="text-sm text-gray-600">→ Escalate to Tech</p>
+                                <p class="text-sm text-gray-600">→ Track incident</p>
+                            </div>
+                            
+                            <div class="bg-emerald-50 rounded-xl p-5 border border-emerald-200">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <span class="text-xl">🎯</span>
+                                    <span class="font-semibold text-emerald-700">Expansion Opportunity</span>
+                                </div>
+                                <p class="text-sm text-gray-600">→ Auto soft-sell <span class="text-gray-400">(small)</span></p>
+                                <p class="text-sm text-gray-600">→ Create Lead <span class="text-gray-400">(enterprise)</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 6: Expansion Triggers -->
+    <section id="triggers" class="min-h-screen triggers-bg flex items-center py-20">
+        <div class="container mx-auto px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-16 fade-in">
+                    <p class="text-dp-teal font-semibold tracking-wider uppercase mb-4">Intelligence Layer</p>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6">Expansion Triggers</h2>
+                    <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                        Beyond basic eligibility — detecting real buying signals through behavioral and contextual analysis
+                    </p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Basic Triggers -->
+                    <div class="trigger-card bg-white rounded-xl p-6 border border-gray-200 fade-in" style="transition-delay: 0.1s;">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">✓</span>
+                            <span class="text-xs font-medium text-gray-400 uppercase">Basic</span>
+                        </div>
+                        <h4 class="font-semibold mb-2">Not on Premium Plan</h4>
+                        <p class="text-sm text-gray-500">Customer is on Basic/Free tier</p>
+                    </div>
+                    
+                    <div class="trigger-card bg-white rounded-xl p-6 border border-gray-200 fade-in" style="transition-delay: 0.15s;">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">✓</span>
+                            <span class="text-xs font-medium text-gray-400 uppercase">Basic</span>
+                        </div>
+                        <h4 class="font-semibold mb-2">Onboarding Completed</h4>
+                        <p class="text-sm text-gray-500">Customer knows the product</p>
+                    </div>
+                    
+                    <div class="trigger-card bg-white rounded-xl p-6 border border-gray-200 fade-in" style="transition-delay: 0.2s;">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">✓</span>
+                            <span class="text-xs font-medium text-gray-400 uppercase">Basic</span>
+                        </div>
+                        <h4 class="font-semibold mb-2">Feature Request Intent</h4>
+                        <p class="text-sm text-gray-500">Ticket mentions Premium features</p>
+                    </div>
+                    
+                    <!-- Advanced Triggers -->
+                    <div class="trigger-card bg-gradient-to-br from-dp-teal-light to-white rounded-xl p-6 border border-dp-teal/30 fade-in" style="transition-delay: 0.25s;">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="w-8 h-8 bg-dp-teal/20 rounded-lg flex items-center justify-center">🔍</span>
+                            <span class="text-xs font-medium text-dp-teal uppercase">Advanced</span>
+                        </div>
+                        <h4 class="font-semibold mb-2">Feature Discovery Attempts</h4>
+                        <p class="text-sm text-gray-500">Clicked on blocked features 3+ times — clear intent signal</p>
+                    </div>
+                    
+                    <div class="trigger-card bg-gradient-to-br from-purple-50 to-white rounded-xl p-6 border border-purple-200 fade-in" style="transition-delay: 0.3s;">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">🎭</span>
+                            <span class="text-xs font-medium text-purple-600 uppercase">Advanced</span>
+                        </div>
+                        <h4 class="font-semibold mb-2">Sentiment Analysis</h4>
+                        <p class="text-sm text-gray-500">Positive/curious tone vs frustrated — adapt sales approach</p>
+                    </div>
+                    
+                    <div class="trigger-card bg-gradient-to-br from-blue-50 to-white rounded-xl p-6 border border-blue-200 fade-in" style="transition-delay: 0.35s;">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">📈</span>
+                            <span class="text-xs font-medium text-blue-600 uppercase">Advanced</span>
+                        </div>
+                        <h4 class="font-semibold mb-2">Velocity of Use</h4>
+                        <p class="text-sm text-gray-500">Usage increased X% in 30 days — growth signal</p>
+                    </div>
+                    
+                    <div class="trigger-card bg-gradient-to-br from-amber-50 to-white rounded-xl p-6 border border-amber-200 fade-in" style="transition-delay: 0.4s;">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">👥</span>
+                            <span class="text-xs font-medium text-amber-600 uppercase">Advanced</span>
+                        </div>
+                        <h4 class="font-semibold mb-2">Multi-User Growth</h4>
+                        <p class="text-sm text-gray-500">Added new users recently — expanding team needs more</p>
+                    </div>
+                    
+                    <div class="trigger-card bg-gradient-to-br from-emerald-50 to-white rounded-xl p-6 border border-emerald-200 fade-in" style="transition-delay: 0.45s;">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">📅</span>
+                            <span class="text-xs font-medium text-emerald-600 uppercase">Advanced</span>
+                        </div>
+                        <h4 class="font-semibold mb-2">Contract Renewal Approaching</h4>
+                        <p class="text-sm text-gray-500">60 days before renewal — natural renegotiation moment</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 7: AI Logic -->
+    <section id="ai-logic" class="min-h-screen bg-slate-900 text-white flex items-center py-20">
+        <div class="container mx-auto px-6">
+            <div class="max-w-5xl mx-auto">
+                <div class="text-center mb-16 fade-in">
+                    <p class="text-dp-teal font-semibold tracking-wider uppercase mb-4">The Brain</p>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6">AI Intent Classification</h2>
+                    <p class="text-xl text-gray-400">A decision layer, not just a reply engine</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="fade-in" style="transition-delay: 0.1s;">
+                        <h3 class="text-xl font-semibold mb-6">The AI analyzes:</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3">
+                                <span class="w-6 h-6 bg-dp-teal rounded flex items-center justify-center text-sm flex-shrink-0 mt-0.5">1</span>
+                                <div>
+                                    <p class="font-medium">Ticket Content</p>
+                                    <p class="text-sm text-gray-400">Natural language understanding of the request</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-6 h-6 bg-dp-teal rounded flex items-center justify-center text-sm flex-shrink-0 mt-0.5">2</span>
+                                <div>
+                                    <p class="font-medium">Customer Context</p>
+                                    <p class="text-sm text-gray-400">Account data, plan, engagement, history from Salesforce</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-6 h-6 bg-dp-teal rounded flex items-center justify-center text-sm flex-shrink-0 mt-0.5">3</span>
+                                <div>
+                                    <p class="font-medium">Behavioral Signals</p>
+                                    <p class="text-sm text-gray-400">Feature attempts, usage velocity, team growth</p>
+                                </div>
+                            </li>
+                        </ul>
+                        
+                        <div class="mt-8 p-4 bg-slate-800 rounded-lg border border-slate-700">
+                            <p class="text-sm text-gray-400 mb-2">Why structured JSON output?</p>
+                            <ul class="text-sm space-y-1 text-gray-300">
+                                <li>✓ Removes ambiguity</li>
+                                <li>✓ Enables automation</li>
+                                <li>✓ Makes decisions auditable</li>
+                                <li>✓ Scalable across markets</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="fade-in" style="transition-delay: 0.2s;">
+                        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 font-mono text-sm">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                <span class="text-gray-500 ml-2 text-xs">AI Classification Response</span>
+                            </div>
+                            <pre class="text-emerald-400 overflow-x-auto"><code>{
+  "intent": "expansion",
+  "confidence": 0.94,
+  "product": "premium_suite",
+  "triggers_met": 6,
+  "triggers_total": 6,
+  "sentiment": "curious",
+  "action": "sales_handoff",
+  "routing": {
+    "team": "enterprise_sales",
+    "priority": "high",
+    "sla_hours": 2
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 8: Operational Scale -->
+    <section id="scale" class="min-h-screen bg-white flex items-center py-20">
+        <div class="container mx-auto px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-16 fade-in">
+                    <p class="text-dp-teal font-semibold tracking-wider uppercase mb-4">Global Rollout</p>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6">Scale Without Breaking</h2>
+                    <p class="text-xl text-gray-600">Global logic, local flexibility</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-12">
+                    <div class="fade-in" style="transition-delay: 0.1s;">
+                        <div class="bg-slate-900 text-white rounded-2xl p-8">
+                            <h3 class="text-lg font-semibold mb-6 flex items-center gap-2">
+                                <span class="w-8 h-8 bg-dp-teal rounded flex items-center justify-center">🌍</span>
+                                Global (Standardized)
+                            </h3>
+                            <ul class="space-y-3">
+                                <li class="flex items-center gap-3">
+                                    <svg class="w-5 h-5 text-dp-teal flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    AI intent classification model
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <svg class="w-5 h-5 text-dp-teal flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    JSON output structure
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <svg class="w-5 h-5 text-dp-teal flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    Expansion trigger rules
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <svg class="w-5 h-5 text-dp-teal flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    Risk & exclusion logic
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <svg class="w-5 h-5 text-dp-teal flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    Routing architecture
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="fade-in" style="transition-delay: 0.2s;">
+                        <div class="bg-gray-50 rounded-2xl p-8 border border-gray-200">
+                            <h3 class="text-lg font-semibold mb-6 flex items-center gap-2">
+                                <span class="w-8 h-8 bg-gray-200 rounded flex items-center justify-center">🏠</span>
+                                Local (Configurable)
+                            </h3>
+                            <ul class="space-y-3">
+                                <li class="flex items-center gap-3">
+                                    <span class="w-5 h-5 bg-gray-200 rounded flex items-center justify-center text-xs">🇪🇸</span>
+                                    Sales pitch and messaging
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <span class="w-5 h-5 bg-gray-200 rounded flex items-center justify-center text-xs">🇵🇱</span>
+                                    Pricing and packaging
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <span class="w-5 h-5 bg-gray-200 rounded flex items-center justify-center text-xs">🇮🇹</span>
+                                    Language and tone
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <span class="w-5 h-5 bg-gray-200 rounded flex items-center justify-center text-xs">🇲🇽</span>
+                                    Sales team routing
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <span class="w-5 h-5 bg-gray-200 rounded flex items-center justify-center text-xs">🇧🇷</span>
+                                    Local compliance rules
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-12 text-center fade-in" style="transition-delay: 0.3s;">
+                    <div class="inline-flex items-center gap-3 bg-dp-teal-light rounded-full px-6 py-3">
+                        <span class="text-xl">💡</span>
+                        <p class="text-dp-teal-dark font-medium">A change in Barcelona's sales pitch won't break Warsaw's workflow</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 9: Impact -->
+    <section id="impact" class="min-h-screen bg-gradient-to-br from-dp-teal to-dp-teal-dark text-white flex items-center py-20">
+        <div class="container mx-auto px-6">
+            <div class="max-w-5xl mx-auto text-center">
+                <div class="fade-in">
+                    <p class="text-dp-teal-light font-semibold tracking-wider uppercase mb-4">The Impact</p>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6">Why This Works</h2>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-6 mt-12">
+                    <div class="bg-white/10 backdrop-blur rounded-2xl p-6 text-left fade-in" style="transition-delay: 0.1s;">
+                        <span class="text-3xl mb-4 block">💰</span>
+                        <h3 class="text-xl font-semibold mb-2">Unlocks Revenue</h3>
+                        <p class="text-white/80">Captures buying signals that are currently lost in support tickets</p>
+                    </div>
+                    
+                    <div class="bg-white/10 backdrop-blur rounded-2xl p-6 text-left fade-in" style="transition-delay: 0.2s;">
+                        <span class="text-3xl mb-4 block">😊</span>
+                        <h3 class="text-xl font-semibold mb-2">Improves Experience</h3>
+                        <p class="text-white/80">Customers get helpful answers instead of "sorry, not available"</p>
+                    </div>
+                    
+                    <div class="bg-white/10 backdrop-blur rounded-2xl p-6 text-left fade-in" style="transition-delay: 0.3s;">
+                        <span class="text-3xl mb-4 block">🎯</span>
+                        <h3 class="text-xl font-semibold mb-2">Empowers Agents</h3>
+                        <p class="text-white/80">Better context, smarter routing, more impactful conversations</p>
+                    </div>
+                    
+                    <div class="bg-white/10 backdrop-blur rounded-2xl p-6 text-left fade-in" style="transition-delay: 0.4s;">
+                        <span class="text-3xl mb-4 block">🤖</span>
+                        <h3 class="text-xl font-semibold mb-2">Uses AI Pragmatically</h3>
+                        <p class="text-white/80">AI as decision layer, not replacement — safe and scalable</p>
+                    </div>
+                </div>
+                
+                <div class="mt-16 fade-in" style="transition-delay: 0.5s;">
+                    <div class="bg-white rounded-2xl p-8 text-gray-800">
+                        <h3 class="text-2xl font-bold mb-6 gradient-text">Projected Impact</h3>
+                        <div class="grid md:grid-cols-3 gap-8">
+                            <div>
+                                <p class="text-4xl font-bold text-dp-teal">€ [TBD]</p>
+                                <p class="text-gray-500">Additional Annual Revenue</p>
+                            </div>
+                            <div>
+                                <p class="text-4xl font-bold text-dp-teal">[X]%</p>
+                                <p class="text-gray-500">Ticket-to-Lead Conversion</p>
+                            </div>
+                            <div>
+                                <p class="text-4xl font-bold text-dp-teal">[Y]%</p>
+                                <p class="text-gray-500">Reduction in Lost Opportunities</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-400 mt-6">* Metrics to be calculated based on historical data analysis</p>
+                    </div>
+                </div>
+                
+                <div class="mt-12 fade-in" style="transition-delay: 0.6s;">
+                    <p class="text-2xl font-light">
+                        "We stop losing buying signals<br>
+                        <span class="font-bold">without compromising customer experience.</span>"
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 10: Live Demo -->
+    <section id="demo" class="min-h-screen bg-gray-50 flex items-center py-20">
+        <div class="container mx-auto px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-12 fade-in">
+                    <p class="text-dp-teal font-semibold tracking-wider uppercase mb-4">See It In Action</p>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6">Interactive Demo</h2>
+                    <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                        Explore the Salesforce implementation with real workflow examples
+                    </p>
+                </div>
+                
+                <div class="fade-in" style="transition-delay: 0.2s;">
+                    <div class="mockup-frame bg-white">
+                        <div class="bg-gray-200 px-4 py-2 flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-400"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-400"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-400"></span>
+                            <span class="ml-4 text-sm text-gray-500">zepierno.github.io/docplanner-case</span>
+                        </div>
+                        <iframe 
+                            src="https://zepierno.github.io/docplanner-case/" 
+                            class="w-full h-[600px] border-0"
+                            title="Salesforce Mock-up Demo"
+                        ></iframe>
+                    </div>
+                </div>
+                
+                <div class="mt-8 text-center fade-in" style="transition-delay: 0.3s;">
+                    <a 
+                        href="https://zepierno.github.io/docplanner-case/" 
+                        target="_blank"
+                        class="inline-flex items-center gap-2 bg-dp-teal text-white px-8 py-4 rounded-full font-semibold hover:bg-dp-teal-dark transition-colors"
+                    >
+                        Open Full Demo
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
+                    </a>
+                </div>
+                
+                <div class="mt-16 grid md:grid-cols-3 gap-6 fade-in" style="transition-delay: 0.4s;">
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <span class="text-2xl mb-3 block">📋</span>
+                        <h4 class="font-semibold mb-2">Cases Queue</h4>
+                        <p class="text-sm text-gray-500">AI-classified tickets with next step recommendations</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <span class="text-2xl mb-3 block">🎯</span>
+                        <h4 class="font-semibold mb-2">Expansion Detection</h4>
+                        <p class="text-sm text-gray-500">See triggers analysis and automated actions</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <span class="text-2xl mb-3 block">💼</span>
+                        <h4 class="font-semibold mb-2">Full Pipeline</h4>
+                        <p class="text-sm text-gray-500">From Case → Lead → Opportunity</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-white py-12">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-2xl font-bold gradient-text mb-4">Thank You</p>
+            <p class="text-gray-400 mb-8">Expansion Pipeline — Making Support a Growth Lever</p>
+            <div class="flex items-center justify-center gap-4 text-sm text-gray-500">
+                <span>Docplanner Business Case</span>
+                <span>•</span>
+                <span>Customer Care × Sales</span>
+                <span>•</span>
+                <span>2026</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Intersection Observer for animations
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right, .scale-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Navigation dots active state
+        const sections = document.querySelectorAll('section');
+        const navDots = document.querySelectorAll('.nav-dot');
+
+        const navObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    navDots.forEach(dot => {
+                        dot.classList.remove('active');
+                        if (dot.getAttribute('data-section') === entry.target.id) {
+                            dot.classList.add('active');
+                        }
+                    });
+                }
+            });
+        }, { threshold: 0.5 });
+
+        sections.forEach(section => {
+            navObserver.observe(section);
+        });
+
+        // Smooth scroll for navigation dots
+        navDots.forEach(dot => {
+            dot.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = dot.getAttribute('href');
+                document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
