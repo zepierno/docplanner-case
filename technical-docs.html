@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Documentation | Expansion Pipeline</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dp-teal': '#00b39b',
+                        'dp-teal-light': '#e5faf8',
+                        'dp-teal-dark': '#009681',
+                        'dp-blue': '#3d83df',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        code, pre { font-family: 'JetBrains Mono', monospace; }
+        .gradient-text {
+            background: linear-gradient(135deg, #00b39b 0%, #3d83df 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .code-block {
+            background: #1e293b;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        .code-block pre {
+            padding: 1.5rem;
+            color: #e2e8f0;
+            font-size: 0.875rem;
+            line-height: 1.7;
+        }
+        .code-comment { color: #64748b; }
+        .code-key { color: #7dd3fc; }
+        .code-string { color: #86efac; }
+        .code-number { color: #fbbf24; }
+        .code-boolean { color: #c084fc; }
+        .sidebar-link {
+            transition: all 0.2s;
+        }
+        .sidebar-link:hover, .sidebar-link.active {
+            background: #e5faf8;
+            color: #00b39b;
+            border-left-color: #00b39b;
+        }
+        .table-row:nth-child(even) {
+            background: #f8fafc;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-dp-teal rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">DP</span>
+                    </div>
+                    <div>
+                        <h1 class="font-semibold text-gray-900">Expansion Pipeline</h1>
+                        <p class="text-xs text-gray-500">Technical Documentation</p>
+                    </div>
+                </div>
+                <a href="https://zepierno.github.io/docplanner-case/" target="_blank" class="text-sm text-dp-teal hover:underline flex items-center gap-1">
+                    View Demo →
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto flex">
+        <!-- Sidebar -->
+        <aside class="w-64 flex-shrink-0 border-r border-gray-200 bg-white min-h-screen sticky top-16 overflow-y-auto">
+            <nav class="py-6">
+                <div class="px-4 mb-4">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Documentation</p>
+                </div>
+                <a href="#overview" class="sidebar-link block px-4 py-2 text-sm text-gray-700 border-l-2 border-transparent">Overview</a>
+                <a href="#intent-classification" class="sidebar-link block px-4 py-2 text-sm text-gray-700 border-l-2 border-transparent">Intent Classification</a>
+                <a href="#system-prompt-intent" class="sidebar-link block px-4 py-2 text-sm text-gray-700 border-l-2 border-transparent pl-8">↳ System Prompt</a>
+                <a href="#json-schema" class="sidebar-link block px-4 py-2 text-sm text-gray-700 border-l-2 border-transparent pl-8">↳ JSON Schema</a>
+                <a href="#classification-examples" class="sidebar-link block px-4 py-2 text-sm text-gray-700 border-l-2 border-transparent pl-8">↳ Examples</a>
+                <a href="#expansion-triggers" class="sidebar-link block px-4 py-2 text-sm text-gray-700 border-l-2 border-transparent">Expansion Triggers</a>
+                <a href="#soft-sell" class="sidebar-link block px-4 py-2 text-sm text-gray-700 border-l-2 border-transparent">Soft-Sell System</a>
+                <a href="#system-prompt-softsell" class="sidebar-link block px-4 py-2 text-sm text-gray-700 border-l-2 border-transparent pl-8">↳ System Prompt</a>
+                <a href="#message-examples" class="sidebar-link block px-4 py-2 text-sm text-gray-700 border-l-2 border-transparent pl-8">↳ Message Examples</a>
+                <a href="#routing-logic" class="sidebar-link block px-4 py-2 text-sm text-gray-700 border-l-2 border-transparent">Routing Logic</a>
+                <a href="#global-local" class="sidebar-link block px-4 py-2 text-sm text-gray-700 border-l-2 border-transparent">Global vs Local Config</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 min-w-0 py-8 px-8">
+            
+            <!-- Overview -->
+            <section id="overview" class="mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Overview</h2>
+                <p class="text-gray-600 mb-6 text-lg">
+                    This document describes the technical implementation of the AI-powered Expansion Pipeline, 
+                    which detects buying signals in support tickets and converts them into revenue opportunities.
+                </p>
+                
+                <div class="bg-dp-teal-light border border-dp-teal/20 rounded-xl p-6 mb-6">
+                    <h3 class="font-semibold text-dp-teal-dark mb-3">Core Principle</h3>
+                    <p class="text-gray-700">
+                        <strong>The key to scaling globally is separating decision logic from execution.</strong> 
+                        AI classifies intent the same way everywhere, but how we act on that decision is configurable per market.
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div class="bg-white rounded-lg p-5 border border-gray-200">
+                        <div class="text-2xl mb-2">🤖</div>
+                        <h4 class="font-semibold mb-1">AI Classification</h4>
+                        <p class="text-sm text-gray-500">Analyzes tickets and outputs structured decisions</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-5 border border-gray-200">
+                        <div class="text-2xl mb-2">⚡</div>
+                        <h4 class="font-semibold mb-1">Smart Routing</h4>
+                        <p class="text-sm text-gray-500">Routes based on intent + customer profile</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-5 border border-gray-200">
+                        <div class="text-2xl mb-2">✉️</div>
+                        <h4 class="font-semibold mb-1">Automated Response</h4>
+                        <p class="text-sm text-gray-500">Generates helpful, contextual messages</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Intent Classification -->
+            <section id="intent-classification" class="mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Intent Classification</h2>
+                <p class="text-gray-600 mb-6">
+                    The AI classification system analyzes incoming support tickets and produces a structured JSON decision. 
+                    This enables automation while keeping decisions auditable and transparent.
+                </p>
+
+                <!-- System Prompt -->
+                <div id="system-prompt-intent" class="mb-10">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <span class="w-6 h-6 bg-dp-teal/10 rounded flex items-center justify-center text-dp-teal text-sm">1</span>
+                        System Prompt for Intent Classification
+                    </h3>
+                    
+                    <div class="code-block">
+                        <pre><span class="code-comment"># SYSTEM PROMPT: Intent Classification Engine</span>
+<span class="code-comment"># Version: 1.0</span>
+<span class="code-comment"># Purpose: Classify support tickets and detect expansion opportunities</span>
+
+You are an AI assistant for Docplanner's Customer Care team. Your role is to analyze 
+incoming support tickets and classify them to enable smart routing and automation.
+
+<span class="code-comment">## YOUR TASK</span>
+Analyze the support ticket content along with the customer context provided, and output 
+a structured JSON classification.
+
+<span class="code-comment">## CLASSIFICATION CATEGORIES</span>
+
+1. **expansion** - Customer is asking about features available in Premium plans they don't have
+   - Examples: video calls, telemedicine, recording, advanced analytics
+   - These are BUYING SIGNALS, not complaints
+   
+2. **training** - Customer doesn't know how to use a feature they ALREADY HAVE access to
+   - Examples: "how do I export?", "where is the calendar?"
+   - Route to tutorials/guides
+   
+3. **bug** - Customer reports something that should work but doesn't
+   - Examples: errors, crashes, sync failures, broken functionality
+   - Route to technical support
+   
+4. **reonboarding** - Customer seems lost or disengaged, needs guidance
+   - Examples: basic setup questions after months of inactivity
+   - Route to customer success
+   
+5. **general** - General inquiries that don't fit other categories
+   - Examples: pricing questions, account changes, cancellations
+
+<span class="code-comment">## CONTEXT YOU WILL RECEIVE</span>
+
+- **ticket_content**: The actual message from the customer
+- **customer_data**: JSON object with account information including:
+  - current_plan: (free/basic/premium)
+  - practitioners_count: number of users
+  - customer_since: date
+  - onboarding_status: (pending/completed)
+  - engagement_score: 0-100
+  - last_login: date
+  - feature_discovery_attempts: list of premium features they tried to access
+  - usage_velocity_change_30d: percentage change in usage
+  - users_added_30d: number of new users added
+  - contract_renewal_date: date
+
+<span class="code-comment">## EXPANSION TRIGGERS TO EVALUATE</span>
+
+For "expansion" classification, check these triggers:
+- [ ] Customer is NOT on Premium plan
+- [ ] Onboarding is completed
+- [ ] No active incidents on the account
+- [ ] Engagement score > 50
+- [ ] Account in good standing (not overdue)
+- [ ] Feature discovery attempts > 0 (they tried to access premium features)
+- [ ] Positive or curious sentiment (not frustrated/angry)
+- [ ] Usage velocity positive (growing usage)
+- [ ] Multi-user growth (added users recently)
+- [ ] Contract renewal within 60 days (opportune timing)
+
+<span class="code-comment">## SENTIMENT ANALYSIS</span>
+
+Evaluate the emotional tone:
+- **positive**: Excited, curious, eager to learn
+- **neutral**: Matter-of-fact, informational
+- **frustrated**: Annoyed but constructive
+- **angry**: Hostile, threatening to leave
+
+<span class="code-comment">## OUTPUT FORMAT</span>
+
+Respond ONLY with a valid JSON object. No explanations or additional text.
+
+```json
+{
+  "intent": "expansion|training|bug|reonboarding|general",
+  "confidence": 0.0-1.0,
+  "product_interest": "premium_suite|specific_feature|null",
+  "sentiment": "positive|neutral|frustrated|angry",
+  "triggers": {
+    "not_on_premium": true|false,
+    "onboarding_completed": true|false,
+    "no_active_incidents": true|false,
+    "high_engagement": true|false,
+    "good_standing": true|false,
+    "feature_discovery_attempts": true|false,
+    "positive_sentiment": true|false,
+    "usage_velocity_positive": true|false,
+    "multi_user_growth": true|false,
+    "contract_renewal_soon": true|false
+  },
+  "triggers_met": 0-10,
+  "triggers_total": 10,
+  "recommended_action": "auto_softsell|sales_handoff|send_tutorial|escalate_tech|schedule_reonboarding|standard_reply",
+  "routing": {
+    "team": "expansion_auto|enterprise_sales|support_l1|support_tech|customer_success",
+    "priority": "high|medium|low",
+    "sla_hours": 2|4|24|48
+  },
+  "reasoning": "Brief explanation of classification decision"
+}
+```
+
+<span class="code-comment">## DECISION RULES</span>
+
+- If intent=expansion AND practitioners_count >= 20: route to enterprise_sales
+- If intent=expansion AND practitioners_count < 20: route to expansion_auto (soft-sell)
+- If intent=expansion AND sentiment=angry: route to support_l1 first (resolve frustration)
+- If confidence < 0.7: add flag for human review
+- If triggers_met < 4 for expansion: reconsider classification
+
+<span class="code-comment">## IMPORTANT</span>
+
+- Be conservative with "expansion" - only classify if there's clear buying intent
+- A frustrated customer asking about premium features is NOT an expansion opportunity yet
+- Always prioritize customer experience over sales
+- When in doubt, classify as "general" for human review</pre>
+                    </div>
+                </div>
+
+                <!-- JSON Schema -->
+                <div id="json-schema" class="mb-10">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <span class="w-6 h-6 bg-dp-teal/10 rounded flex items-center justify-center text-dp-teal text-sm">2</span>
+                        JSON Output Schema
+                    </h3>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full border border-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="text-left p-4 font-semibold text-gray-700">Field</th>
+                                    <th class="text-left p-4 font-semibold text-gray-700">Type</th>
+                                    <th class="text-left p-4 font-semibold text-gray-700">Possible Values</th>
+                                    <th class="text-left p-4 font-semibold text-gray-700">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="table-row border-t border-gray-200">
+                                    <td class="p-4"><code class="bg-gray-100 px-2 py-1 rounded text-sm">intent</code></td>
+                                    <td class="p-4 text-sm text-gray-600">string</td>
+                                    <td class="p-4 text-sm"><code>expansion</code>, <code>training</code>, <code>bug</code>, <code>reonboarding</code>, <code>general</code></td>
+                                    <td class="p-4 text-sm text-gray-600">Primary classification of the ticket</td>
+                                </tr>
+                                <tr class="table-row border-t border-gray-200">
+                                    <td class="p-4"><code class="bg-gray-100 px-2 py-1 rounded text-sm">confidence</code></td>
+                                    <td class="p-4 text-sm text-gray-600">float</td>
+                                    <td class="p-4 text-sm">0.0 - 1.0</td>
+                                    <td class="p-4 text-sm text-gray-600">Model confidence in classification. Below 0.7 triggers human review</td>
+                                </tr>
+                                <tr class="table-row border-t border-gray-200">
+                                    <td class="p-4"><code class="bg-gray-100 px-2 py-1 rounded text-sm">product_interest</code></td>
+                                    <td class="p-4 text-sm text-gray-600">string|null</td>
+                                    <td class="p-4 text-sm"><code>premium_suite</code>, <code>video_calls</code>, <code>analytics</code>, <code>null</code></td>
+                                    <td class="p-4 text-sm text-gray-600">Specific product/feature the customer is interested in</td>
+                                </tr>
+                                <tr class="table-row border-t border-gray-200">
+                                    <td class="p-4"><code class="bg-gray-100 px-2 py-1 rounded text-sm">sentiment</code></td>
+                                    <td class="p-4 text-sm text-gray-600">string</td>
+                                    <td class="p-4 text-sm"><code>positive</code>, <code>neutral</code>, <code>frustrated</code>, <code>angry</code></td>
+                                    <td class="p-4 text-sm text-gray-600">Emotional tone of the message - affects routing strategy</td>
+                                </tr>
+                                <tr class="table-row border-t border-gray-200">
+                                    <td class="p-4"><code class="bg-gray-100 px-2 py-1 rounded text-sm">triggers</code></td>
+                                    <td class="p-4 text-sm text-gray-600">object</td>
+                                    <td class="p-4 text-sm">Boolean flags for each trigger</td>
+                                    <td class="p-4 text-sm text-gray-600">Detailed breakdown of which expansion triggers are met</td>
+                                </tr>
+                                <tr class="table-row border-t border-gray-200">
+                                    <td class="p-4"><code class="bg-gray-100 px-2 py-1 rounded text-sm">triggers_met</code></td>
+                                    <td class="p-4 text-sm text-gray-600">integer</td>
+                                    <td class="p-4 text-sm">0 - 10</td>
+                                    <td class="p-4 text-sm text-gray-600">Count of triggers satisfied. Higher = stronger expansion signal</td>
+                                </tr>
+                                <tr class="table-row border-t border-gray-200">
+                                    <td class="p-4"><code class="bg-gray-100 px-2 py-1 rounded text-sm">recommended_action</code></td>
+                                    <td class="p-4 text-sm text-gray-600">string</td>
+                                    <td class="p-4 text-sm"><code>auto_softsell</code>, <code>sales_handoff</code>, <code>send_tutorial</code>, <code>escalate_tech</code>, <code>schedule_reonboarding</code>, <code>standard_reply</code></td>
+                                    <td class="p-4 text-sm text-gray-600">Recommended action for the system to take</td>
+                                </tr>
+                                <tr class="table-row border-t border-gray-200">
+                                    <td class="p-4"><code class="bg-gray-100 px-2 py-1 rounded text-sm">routing.team</code></td>
+                                    <td class="p-4 text-sm text-gray-600">string</td>
+                                    <td class="p-4 text-sm"><code>expansion_auto</code>, <code>enterprise_sales</code>, <code>support_l1</code>, <code>support_tech</code>, <code>customer_success</code></td>
+                                    <td class="p-4 text-sm text-gray-600">Team/queue to route the ticket to</td>
+                                </tr>
+                                <tr class="table-row border-t border-gray-200">
+                                    <td class="p-4"><code class="bg-gray-100 px-2 py-1 rounded text-sm">routing.priority</code></td>
+                                    <td class="p-4 text-sm text-gray-600">string</td>
+                                    <td class="p-4 text-sm"><code>high</code>, <code>medium</code>, <code>low</code></td>
+                                    <td class="p-4 text-sm text-gray-600">Priority level affecting SLA and queue position</td>
+                                </tr>
+                                <tr class="table-row border-t border-gray-200">
+                                    <td class="p-4"><code class="bg-gray-100 px-2 py-1 rounded text-sm">routing.sla_hours</code></td>
+                                    <td class="p-4 text-sm text-gray-600">integer</td>
+                                    <td class="p-4 text-sm">2, 4, 24, 48</td>
+                                    <td class="p-4 text-sm text-gray-600">Target response time in hours</td>
+                                </tr>
+                                <tr class="table-row border-t border-gray-200">
+                                    <td class="p-4"><code class="bg-gray-100 px-2 py-1 rounded text-sm">reasoning</code></td>
+                                    <td class="p-4 text-sm text-gray-600">string</td>
+                                    <td class="p-4 text-sm">Free text</td>
+                                    <td class="p-4 text-sm text-gray-600">Human-readable explanation for audit purposes</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Classification Examples -->
+                <div id="classification-examples" class="mb-10">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <span class="w-6 h-6 bg-dp-teal/10 rounded flex items-center justify-center text-dp-teal text-sm">3</span>
+                        Classification Examples
+                    </h3>
+
+                    <!-- Example 1: Expansion - Small Clinic -->
+                    <div class="mb-6 bg-white border border-gray-200 rounded-xl overflow-hidden">
+                        <div class="bg-emerald-50 px-5 py-3 border-b border-emerald-100">
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg">🎯</span>
+                                <span class="font-semibold text-emerald-800">Expansion Opportunity - Small Clinic</span>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <p class="text-sm text-gray-500 mb-2">Input - Ticket Content:</p>
+                            <div class="bg-gray-50 rounded-lg p-4 mb-4 text-sm text-gray-700 italic">
+                                "Hello, I'm trying to do a video call with a patient but I can't find the button anywhere in the dashboard. I've looked in the appointments section and the patient profile but there's no video option. Can you help me? We have several patients who would prefer remote consultations."
+                            </div>
+                            <p class="text-sm text-gray-500 mb-2">Output:</p>
+                            <div class="code-block">
+                                <pre>{
+  <span class="code-key">"intent"</span>: <span class="code-string">"expansion"</span>,
+  <span class="code-key">"confidence"</span>: <span class="code-number">0.94</span>,
+  <span class="code-key">"product_interest"</span>: <span class="code-string">"video_calls"</span>,
+  <span class="code-key">"sentiment"</span>: <span class="code-string">"positive"</span>,
+  <span class="code-key">"triggers"</span>: {
+    <span class="code-key">"not_on_premium"</span>: <span class="code-boolean">true</span>,
+    <span class="code-key">"onboarding_completed"</span>: <span class="code-boolean">true</span>,
+    <span class="code-key">"no_active_incidents"</span>: <span class="code-boolean">true</span>,
+    <span class="code-key">"high_engagement"</span>: <span class="code-boolean">true</span>,
+    <span class="code-key">"good_standing"</span>: <span class="code-boolean">true</span>,
+    <span class="code-key">"feature_discovery_attempts"</span>: <span class="code-boolean">true</span>,
+    <span class="code-key">"positive_sentiment"</span>: <span class="code-boolean">true</span>,
+    <span class="code-key">"usage_velocity_positive"</span>: <span class="code-boolean">false</span>,
+    <span class="code-key">"multi_user_growth"</span>: <span class="code-boolean">false</span>,
+    <span class="code-key">"contract_renewal_soon"</span>: <span class="code-boolean">false</span>
+  },
+  <span class="code-key">"triggers_met"</span>: <span class="code-number">7</span>,
+  <span class="code-key">"triggers_total"</span>: <span class="code-number">10</span>,
+  <span class="code-key">"recommended_action"</span>: <span class="code-string">"auto_softsell"</span>,
+  <span class="code-key">"routing"</span>: {
+    <span class="code-key">"team"</span>: <span class="code-string">"expansion_auto"</span>,
+    <span class="code-key">"priority"</span>: <span class="code-string">"high"</span>,
+    <span class="code-key">"sla_hours"</span>: <span class="code-number">2</span>
+  },
+  <span class="code-key">"reasoning"</span>: <span class="code-string">"Customer on Basic plan actively seeking video call feature. Positive sentiment, high engagement. Small clinic (2 practitioners) - suitable for automated soft-sell flow."</span>
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Example 2: Expansion - Enterprise -->
+                    <div class="mb-6 bg-white border border-gray-200 rounded-xl overflow-hidden">
+                        <div class="bg-purple-50 px-5 py-3 border-b border-purple-100">
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg">🏢</span>
+                                <span class="font-semibold text-purple-800">Expansion Opportunity - Enterprise</span>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <p class="text-sm text-gray-500 mb-2">Input - Ticket Content:</p>
+                            <div class="bg-gray-50 rounded-lg p-4 mb-4 text-sm text-gray-700 italic">
+                                "Hi, we're looking to implement telemedicine capabilities across our hospital departments. We currently use your platform for appointment scheduling but need video consultation features for our 127 practitioners. Can you provide information about enterprise video solutions and integration with our existing hospital systems?"
+                            </div>
+                            <p class="text-sm text-gray-500 mb-2">Output:</p>
+                            <div class="code-block">
+                                <pre>{
+  <span class="code-key">"intent"</span>: <span class="code-string">"expansion"</span>,
+  <span class="code-key">"confidence"</span>: <span class="code-number">0.97</span>,
+  <span class="code-key">"product_interest"</span>: <span class="code-string">"premium_suite"</span>,
+  <span class="code-key">"sentiment"</span>: <span class="code-string">"positive"</span>,
+  <span class="code-key">"triggers"</span>: {
+    <span class="code-key">"not_on_premium"</span>: <span class="code-boolean">true</span>,
+    <span class="code-key">"onboarding_completed"</span>: <span class="code-boolean">true</span>,
+    <span class="code-key">"no_active_incidents"</span>: <span class="code-boolean">true</span>,
+    <span class="code-key">"high_engagement"</span>: <span class="code-boolean">true</span>,
+    <span class="code-key">"good_standing"</span>: <span class="code-boolean">true</span>,
+    <span class="code-key">"feature_discovery_attempts"</span>: <span class="code-boolean">true</span>,
+    <span class="code-key">"positive_sentiment"</span>: <span class="code-boolean">true</span>,
+    <span class="code-key">"usage_velocity_positive"</span>: <span class="code-boolean">true</span>,
+    <span class="code-key">"multi_user_growth"</span>: <span class="code-boolean">true</span>,
+    <span class="code-key">"contract_renewal_soon"</span>: <span class="code-boolean">false</span>
+  },
+  <span class="code-key">"triggers_met"</span>: <span class="code-number">9</span>,
+  <span class="code-key">"triggers_total"</span>: <span class="code-number">10</span>,
+  <span class="code-key">"recommended_action"</span>: <span class="code-string">"sales_handoff"</span>,
+  <span class="code-key">"routing"</span>: {
+    <span class="code-key">"team"</span>: <span class="code-string">"enterprise_sales"</span>,
+    <span class="code-key">"priority"</span>: <span class="code-string">"high"</span>,
+    <span class="code-key">"sla_hours"</span>: <span class="code-number">2</span>
+  },
+  <span class="code-key">"reasoning"</span>: <span class="code-string">"Enterprise hospital (127 practitioners) explicitly requesting telemedicine solution. High-value opportunity requiring consultative sales approach. Create Lead and assign to Enterprise Sales immediately."</span>
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Example 3: Training Issue -->
+                    <div class="mb-6 bg-white border border-gray-200 rounded-xl overflow-hidden">
+                        <div class="bg-blue-50 px-5 py-3 border-b border-blue-100">
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg">📚</span>
+                                <span class="font-semibold text-blue-800">Training Issue</span>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <p class="text-sm text-gray-500 mb-2">Input - Ticket Content:</p>
+                            <div class="bg-gray-50 rounded-lg p-4 mb-4 text-sm text-gray-700 italic">
+                                "How do I export my patient list to Excel? I need to send it to my accountant."
+                            </div>
+                            <p class="text-sm text-gray-500 mb-2">Output:</p>
+                            <div class="code-block">
+                                <pre>{
+  <span class="code-key">"intent"</span>: <span class="code-string">"training"</span>,
+  <span class="code-key">"confidence"</span>: <span class="code-number">0.91</span>,
+  <span class="code-key">"product_interest"</span>: <span class="code-boolean">null</span>,
+  <span class="code-key">"sentiment"</span>: <span class="code-string">"neutral"</span>,
+  <span class="code-key">"triggers"</span>: { ... },
+  <span class="code-key">"triggers_met"</span>: <span class="code-number">0</span>,
+  <span class="code-key">"triggers_total"</span>: <span class="code-number">10</span>,
+  <span class="code-key">"recommended_action"</span>: <span class="code-string">"send_tutorial"</span>,
+  <span class="code-key">"routing"</span>: {
+    <span class="code-key">"team"</span>: <span class="code-string">"support_l1"</span>,
+    <span class="code-key">"priority"</span>: <span class="code-string">"medium"</span>,
+    <span class="code-key">"sla_hours"</span>: <span class="code-number">24</span>
+  },
+  <span class="code-key">"reasoning"</span>: <span class="code-string">"Customer asking how to use existing feature (export). Send tutorial link for patient export functionality."</span>
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Example 4: Bug -->
+                    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                        <div class="bg-red-50 px-5 py-3 border-b border-red-100">
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg">🐛</span>
+                                <span class="font-semibold text-red-800">Bug / Technical Issue</span>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <p class="text-sm text-gray-500 mb-2">Input - Ticket Content:</p>
+                            <div class="bg-gray-50 rounded-lg p-4 mb-4 text-sm text-gray-700 italic">
+                                "The calendar is not syncing with my Google Calendar anymore. It worked fine last week but now appointments don't appear. I've tried disconnecting and reconnecting but same issue. This is urgent as I'm missing appointments!"
+                            </div>
+                            <p class="text-sm text-gray-500 mb-2">Output:</p>
+                            <div class="code-block">
+                                <pre>{
+  <span class="code-key">"intent"</span>: <span class="code-string">"bug"</span>,
+  <span class="code-key">"confidence"</span>: <span class="code-number">0.95</span>,
+  <span class="code-key">"product_interest"</span>: <span class="code-boolean">null</span>,
+  <span class="code-key">"sentiment"</span>: <span class="code-string">"frustrated"</span>,
+  <span class="code-key">"triggers"</span>: { ... },
+  <span class="code-key">"triggers_met"</span>: <span class="code-number">0</span>,
+  <span class="code-key">"triggers_total"</span>: <span class="code-number">10</span>,
+  <span class="code-key">"recommended_action"</span>: <span class="code-string">"escalate_tech"</span>,
+  <span class="code-key">"routing"</span>: {
+    <span class="code-key">"team"</span>: <span class="code-string">"support_tech"</span>,
+    <span class="code-key">"priority"</span>: <span class="code-string">"high"</span>,
+    <span class="code-key">"sla_hours"</span>: <span class="code-number">4</span>
+  },
+  <span class="code-key">"reasoning"</span>: <span class="code-string">"Technical issue with Google Calendar sync. Customer frustrated and experiencing business impact. Escalate to technical support with high priority."</span>
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Expansion Triggers -->
+            <section id="expansion-triggers" class="mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Expansion Triggers</h2>
+                <p class="text-gray-600 mb-6">
+                    Beyond basic eligibility checks, we use behavioral and contextual signals to identify 
+                    genuine buying intent and optimal timing.
+                </p>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Basic Triggers -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-6">
+                        <h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                            <span class="w-6 h-6 bg-gray-100 rounded flex items-center justify-center text-sm">📋</span>
+                            Basic Eligibility
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-3">
+                                <span class="w-5 h-5 bg-gray-100 rounded flex items-center justify-center text-xs flex-shrink-0 mt-0.5">1</span>
+                                <div>
+                                    <p class="font-medium text-sm">Not on Premium Plan</p>
+                                    <p class="text-xs text-gray-500">Customer has room to upgrade</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="w-5 h-5 bg-gray-100 rounded flex items-center justify-center text-xs flex-shrink-0 mt-0.5">2</span>
+                                <div>
+                                    <p class="font-medium text-sm">Onboarding Completed</p>
+                                    <p class="text-xs text-gray-500">Customer knows the product basics</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="w-5 h-5 bg-gray-100 rounded flex items-center justify-center text-xs flex-shrink-0 mt-0.5">3</span>
+                                <div>
+                                    <p class="font-medium text-sm">No Active Incidents</p>
+                                    <p class="text-xs text-gray-500">Not experiencing issues that would overshadow upsell</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="w-5 h-5 bg-gray-100 rounded flex items-center justify-center text-xs flex-shrink-0 mt-0.5">4</span>
+                                <div>
+                                    <p class="font-medium text-sm">Good Standing</p>
+                                    <p class="text-xs text-gray-500">Account not overdue or flagged</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="w-5 h-5 bg-gray-100 rounded flex items-center justify-center text-xs flex-shrink-0 mt-0.5">5</span>
+                                <div>
+                                    <p class="font-medium text-sm">High Engagement</p>
+                                    <p class="text-xs text-gray-500">Engagement score > 50</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Triggers -->
+                    <div class="bg-gradient-to-br from-dp-teal-light to-white border border-dp-teal/20 rounded-xl p-6">
+                        <h3 class="font-semibold text-dp-teal-dark mb-4 flex items-center gap-2">
+                            <span class="w-6 h-6 bg-dp-teal/20 rounded flex items-center justify-center text-sm">🎯</span>
+                            Advanced Signals
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-3">
+                                <span class="w-5 h-5 bg-dp-teal/20 rounded flex items-center justify-center text-xs flex-shrink-0 mt-0.5">🔍</span>
+                                <div>
+                                    <p class="font-medium text-sm">Feature Discovery Attempts</p>
+                                    <p class="text-xs text-gray-500">Clicked on premium features 3+ times — clear intent</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="w-5 h-5 bg-dp-teal/20 rounded flex items-center justify-center text-xs flex-shrink-0 mt-0.5">🎭</span>
+                                <div>
+                                    <p class="font-medium text-sm">Positive/Curious Sentiment</p>
+                                    <p class="text-xs text-gray-500">Tone analysis to adapt sales approach</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="w-5 h-5 bg-dp-teal/20 rounded flex items-center justify-center text-xs flex-shrink-0 mt-0.5">📈</span>
+                                <div>
+                                    <p class="font-medium text-sm">Usage Velocity Positive</p>
+                                    <p class="text-xs text-gray-500">Increased usage in last 30 days — growth signal</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="w-5 h-5 bg-dp-teal/20 rounded flex items-center justify-center text-xs flex-shrink-0 mt-0.5">👥</span>
+                                <div>
+                                    <p class="font-medium text-sm">Multi-User Growth</p>
+                                    <p class="text-xs text-gray-500">Added new users recently — expanding needs</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="w-5 h-5 bg-dp-teal/20 rounded flex items-center justify-center text-xs flex-shrink-0 mt-0.5">📅</span>
+                                <div>
+                                    <p class="font-medium text-sm">Contract Renewal Approaching</p>
+                                    <p class="text-xs text-gray-500">Within 60 days — natural renegotiation window</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Soft-Sell System -->
+            <section id="soft-sell" class="mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Automated Soft-Sell System</h2>
+                <p class="text-gray-600 mb-6">
+                    For small clinics, we generate automated responses that are <strong>helpful first, commercial second</strong>. 
+                    The goal is to solve the customer's immediate need while naturally introducing the value proposition.
+                </p>
+
+                <div class="bg-dp-teal-light border border-dp-teal/20 rounded-xl p-6 mb-8">
+                    <h3 class="font-semibold text-dp-teal-dark mb-3">Core Principle</h3>
+                    <p class="text-gray-700 mb-4">
+                        <strong>Help first. Sell second.</strong> A soft-sell message must always resolve the customer's 
+                        confusion before introducing any commercial content. The ratio should be approximately 70% helpful, 30% commercial.
+                    </p>
+                    <div class="grid md:grid-cols-4 gap-3 text-sm">
+                        <div class="bg-white rounded-lg p-3">
+                            <p class="font-semibold text-dp-teal">1. Acknowledge</p>
+                            <p class="text-gray-500 text-xs">Show empathy for their situation</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-3">
+                            <p class="font-semibold text-dp-teal">2. Explain</p>
+                            <p class="text-gray-500 text-xs">Clarify why they can't find the feature</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-3">
+                            <p class="font-semibold text-dp-teal">3. Value</p>
+                            <p class="text-gray-500 text-xs">Introduce the solution naturally</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-3">
+                            <p class="font-semibold text-dp-teal">4. Soft CTA</p>
+                            <p class="text-gray-500 text-xs">Offer next step without pressure</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Prompt for Soft-Sell -->
+                <div id="system-prompt-softsell" class="mb-10">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <span class="w-6 h-6 bg-dp-teal/10 rounded flex items-center justify-center text-dp-teal text-sm">1</span>
+                        System Prompt for Soft-Sell Messages
+                    </h3>
+                    
+                    <div class="code-block">
+                        <pre><span class="code-comment"># SYSTEM PROMPT: Soft-Sell Message Generator</span>
+<span class="code-comment"># Version: 1.0</span>
+<span class="code-comment"># Purpose: Generate helpful responses that naturally introduce Premium value</span>
+
+You are a friendly and knowledgeable Docplanner support assistant. Your role is to help 
+customers who are asking about features available in Premium plans.
+
+<span class="code-comment">## YOUR MISSION</span>
+Write a response that is HELPFUL FIRST, COMMERCIAL SECOND. The customer should feel 
+helped and informed, not sold to.
+
+<span class="code-comment">## RESPONSE STRUCTURE (Follow this exactly)</span>
+
+1. **ACKNOWLEDGE** (1-2 sentences)
+   - Show you understand their need
+   - Use empathetic language
+   - Reference their specific situation
+   
+2. **EXPLAIN** (2-3 sentences)
+   - Clarify that this is a Premium feature (not a bug or missing button)
+   - Be transparent about plan limitations
+   - Avoid making them feel bad about their current plan
+
+3. **VALUE PROPOSITION** (3-4 sentences)
+   - Introduce what the Premium Suite offers
+   - Focus on benefits relevant to THEIR specific request
+   - Use bullet points for clarity
+   - Include 3-4 key features max
+
+4. **SOFT CTA** (1-2 sentences)
+   - Offer to send more information OR
+   - Mention the free trial option
+   - End with an open question, not a hard sell
+   - Make it easy to say no
+
+<span class="code-comment">## TONE GUIDELINES</span>
+
+DO:
+- Be warm and conversational
+- Use "you" and "your" to make it personal
+- Show genuine interest in helping them succeed
+- Acknowledge that upgrading is their choice
+- Offer alternatives if they're not ready to upgrade
+
+DON'T:
+- Use aggressive sales language ("Act now!", "Don't miss out!")
+- Make them feel bad about their current plan
+- Oversell or list too many features
+- Use corporate jargon
+- Pressure them to make a decision
+
+<span class="code-comment">## CONTEXT YOU WILL RECEIVE</span>
+
+- **customer_name**: Name to personalize the greeting
+- **ticket_content**: What they asked about
+- **feature_requested**: The specific Premium feature they want
+- **current_plan**: Their current plan
+- **customer_since**: How long they've been a customer
+- **clinic_name**: Name of their clinic
+- **locale**: Market/language for localization
+
+<span class="code-comment">## EXAMPLE OUTPUT STRUCTURE</span>
+
+Dear [Name],
+
+[ACKNOWLEDGE - empathetic opening]
+
+[EXPLAIN - why they can't find the feature]
+
+[VALUE PROPOSITION - what Premium offers]
+✓ Feature 1
+✓ Feature 2
+✓ Feature 3
+
+[SOFT CTA - gentle next step]
+
+Best regards,
+Docplanner Support Team
+
+<span class="code-comment">## IMPORTANT RULES</span>
+
+1. Never apologize for "not having" the feature - we DO have it, just in Premium
+2. Always position Premium as an opportunity, not a limitation
+3. Keep the message under 200 words
+4. Match the customer's sentiment - if they're frustrated, be more empathetic
+5. Always end with an open question or soft offer
+6. Include a way to start a free trial or learn more</pre>
+                    </div>
+                </div>
+
+                <!-- Message Examples -->
+                <div id="message-examples">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <span class="w-6 h-6 bg-dp-teal/10 rounded flex items-center justify-center text-dp-teal text-sm">2</span>
+                        Message Examples
+                    </h3>
+
+                    <!-- Small Clinic Example -->
+                    <div class="mb-6 bg-white border border-gray-200 rounded-xl overflow-hidden">
+                        <div class="bg-emerald-50 px-5 py-3 border-b border-emerald-100">
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg">🏪</span>
+                                <span class="font-semibold text-emerald-800">Small Clinic - Automated Soft-Sell</span>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <div class="bg-gray-50 rounded-lg p-5 text-sm text-gray-700 whitespace-pre-line">
+Dear Dr. Mendoza,
+
+<span class="bg-yellow-100 px-1">Thank you for reaching out! I completely understand — video consultations have become essential for many clinics, especially when patients prefer the convenience of remote appointments.</span>
+
+<span class="bg-blue-100 px-1">I wanted to clarify that video consultation is a feature included in our Premium Suite, which is why you're not seeing the button in your current dashboard. This isn't a bug — it's simply a capability we haven't unlocked for your plan yet.</span>
+
+<span class="bg-green-100 px-1">The Premium Suite includes everything you need for telemedicine:</span>
+✓ HD Video Calls directly in the patient profile
+✓ Screen sharing for test results and images
+✓ Automatic appointment reminders for video sessions
+✓ Recording capabilities (with patient consent)
+
+<span class="bg-purple-100 px-1">Would you like me to send you more details about the Premium Suite? You can also start a 14-day free trial directly from your dashboard to see if it fits your clinic's needs — no commitment required.</span>
+
+Best regards,
+Docplanner Support Team</div>
+                            <div class="mt-4 flex gap-2">
+                                <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Acknowledge</span>
+                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Explain</span>
+                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Value</span>
+                                <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">Soft CTA</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Enterprise Example -->
+                    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                        <div class="bg-purple-50 px-5 py-3 border-b border-purple-100">
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg">🏢</span>
+                                <span class="font-semibold text-purple-800">Enterprise - Sales Handoff Notification</span>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <div class="bg-gray-50 rounded-lg p-5 text-sm text-gray-700 whitespace-pre-line">
+Dear Dr. Ruiz,
+
+<span class="bg-yellow-100 px-1">Thank you for contacting us. Implementing telemedicine across a large hospital like Hospital Universitario Madrid is an exciting initiative, and I'm glad you're considering Docplanner for this.</span>
+
+<span class="bg-blue-100 px-1">Given the scale of your needs — 127 practitioners across multiple departments — this is exactly the kind of project our Enterprise Solutions team specializes in.</span>
+
+<span class="bg-green-100 px-1">I've connected you with María González, who will reach out within the next 2 hours to discuss:</span>
+• Custom telemedicine implementation for your hospital's workflow
+• Integration options with your existing systems
+• Volume-based pricing designed for institutions your size
+• Dedicated onboarding and ongoing support
+
+<span class="bg-purple-100 px-1">María has extensive experience with healthcare institutions and will be your dedicated point of contact throughout this process. In the meantime, I'm happy to answer any immediate questions you might have.</span>
+
+Best regards,
+Docplanner Support Team</div>
+                            <div class="mt-4 flex gap-2">
+                                <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Acknowledge</span>
+                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Explain</span>
+                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Value</span>
+                                <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">Soft CTA</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Routing Logic -->
+            <section id="routing-logic" class="mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Routing Logic</h2>
+                <p class="text-gray-600 mb-6">
+                    The routing decision tree determines where each ticket goes based on classification and customer profile.
+                </p>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-6">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left p-3 font-semibold text-gray-700">Intent</th>
+                                    <th class="text-left p-3 font-semibold text-gray-700">Condition</th>
+                                    <th class="text-left p-3 font-semibold text-gray-700">Action</th>
+                                    <th class="text-left p-3 font-semibold text-gray-700">Routing</th>
+                                    <th class="text-left p-3 font-semibold text-gray-700">SLA</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="table-row border-b border-gray-100">
+                                    <td class="p-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded text-sm">expansion</span></td>
+                                    <td class="p-3 text-sm text-gray-600">practitioners < 20</td>
+                                    <td class="p-3 text-sm">Auto soft-sell email</td>
+                                    <td class="p-3 text-sm"><code class="bg-gray-100 px-1 rounded">expansion_auto</code></td>
+                                    <td class="p-3 text-sm">2h</td>
+                                </tr>
+                                <tr class="table-row border-b border-gray-100">
+                                    <td class="p-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded text-sm">expansion</span></td>
+                                    <td class="p-3 text-sm text-gray-600">practitioners >= 20</td>
+                                    <td class="p-3 text-sm">Create Lead, assign to Sales</td>
+                                    <td class="p-3 text-sm"><code class="bg-gray-100 px-1 rounded">enterprise_sales</code></td>
+                                    <td class="p-3 text-sm">2h</td>
+                                </tr>
+                                <tr class="table-row border-b border-gray-100">
+                                    <td class="p-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded text-sm">expansion</span></td>
+                                    <td class="p-3 text-sm text-gray-600">sentiment = angry</td>
+                                    <td class="p-3 text-sm">Resolve frustration first</td>
+                                    <td class="p-3 text-sm"><code class="bg-gray-100 px-1 rounded">support_l1</code></td>
+                                    <td class="p-3 text-sm">4h</td>
+                                </tr>
+                                <tr class="table-row border-b border-gray-100">
+                                    <td class="p-3"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">training</span></td>
+                                    <td class="p-3 text-sm text-gray-600">—</td>
+                                    <td class="p-3 text-sm">Send relevant tutorial</td>
+                                    <td class="p-3 text-sm"><code class="bg-gray-100 px-1 rounded">support_l1</code></td>
+                                    <td class="p-3 text-sm">24h</td>
+                                </tr>
+                                <tr class="table-row border-b border-gray-100">
+                                    <td class="p-3"><span class="bg-red-100 text-red-800 px-2 py-1 rounded text-sm">bug</span></td>
+                                    <td class="p-3 text-sm text-gray-600">priority = high</td>
+                                    <td class="p-3 text-sm">Escalate to Tech</td>
+                                    <td class="p-3 text-sm"><code class="bg-gray-100 px-1 rounded">support_tech</code></td>
+                                    <td class="p-3 text-sm">4h</td>
+                                </tr>
+                                <tr class="table-row border-b border-gray-100">
+                                    <td class="p-3"><span class="bg-red-100 text-red-800 px-2 py-1 rounded text-sm">bug</span></td>
+                                    <td class="p-3 text-sm text-gray-600">priority = low/medium</td>
+                                    <td class="p-3 text-sm">Add to backlog</td>
+                                    <td class="p-3 text-sm"><code class="bg-gray-100 px-1 rounded">support_tech</code></td>
+                                    <td class="p-3 text-sm">48h</td>
+                                </tr>
+                                <tr class="table-row border-b border-gray-100">
+                                    <td class="p-3"><span class="bg-amber-100 text-amber-800 px-2 py-1 rounded text-sm">reonboarding</span></td>
+                                    <td class="p-3 text-sm text-gray-600">—</td>
+                                    <td class="p-3 text-sm">Schedule session</td>
+                                    <td class="p-3 text-sm"><code class="bg-gray-100 px-1 rounded">customer_success</code></td>
+                                    <td class="p-3 text-sm">24h</td>
+                                </tr>
+                                <tr class="table-row">
+                                    <td class="p-3"><span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm">general</span></td>
+                                    <td class="p-3 text-sm text-gray-600">—</td>
+                                    <td class="p-3 text-sm">Standard support flow</td>
+                                    <td class="p-3 text-sm"><code class="bg-gray-100 px-1 rounded">support_l1</code></td>
+                                    <td class="p-3 text-sm">24h</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Global vs Local -->
+            <section id="global-local" class="mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Global vs Local Configuration</h2>
+                <p class="text-gray-600 mb-6">
+                    The system is designed for global scale while allowing local market customization.
+                </p>
+
+                <div class="bg-dp-teal-light border border-dp-teal/20 rounded-xl p-6 mb-8">
+                    <p class="text-gray-700 text-lg">
+                        <strong>"The key to scaling globally is separating decision logic from execution.</strong> 
+                        AI classifies intent the same way everywhere, but how we act on that decision is configurable per market."
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-slate-900 text-white rounded-xl p-6">
+                        <h3 class="font-semibold mb-4 flex items-center gap-2">
+                            <span class="text-xl">🌍</span>
+                            Global (Standardized)
+                        </h3>
+                        <p class="text-gray-400 text-sm mb-4">Same everywhere, managed centrally</p>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center gap-2">
+                                <span class="text-dp-teal">✓</span>
+                                AI classification model & prompts
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-dp-teal">✓</span>
+                                JSON output schema
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-dp-teal">✓</span>
+                                Expansion trigger definitions
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-dp-teal">✓</span>
+                                Risk & exclusion rules
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-dp-teal">✓</span>
+                                Routing architecture
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-dp-teal">✓</span>
+                                SLA definitions
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-white border border-gray-200 rounded-xl p-6">
+                        <h3 class="font-semibold mb-4 flex items-center gap-2">
+                            <span class="text-xl">🏠</span>
+                            Local (Configurable)
+                        </h3>
+                        <p class="text-gray-500 text-sm mb-4">Customized per market</p>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center gap-2">
+                                <span class="text-gray-400">🇪🇸</span>
+                                Sales pitch messaging & tone
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-gray-400">🇵🇱</span>
+                                Pricing and packaging details
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-gray-400">🇮🇹</span>
+                                Language translations
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-gray-400">🇲🇽</span>
+                                Sales team routing rules
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-gray-400">🇧🇷</span>
+                                Local compliance requirements
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-gray-400">🇩🇪</span>
+                                Market-specific thresholds
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-gray-50 rounded-xl p-6">
+                    <h4 class="font-semibold mb-4">Configuration Example</h4>
+                    <div class="code-block">
+                        <pre><span class="code-comment">// market_config.json - Spain</span>
+{
+  <span class="code-key">"market"</span>: <span class="code-string">"ES"</span>,
+  <span class="code-key">"language"</span>: <span class="code-string">"es-ES"</span>,
+  <span class="code-key">"currency"</span>: <span class="code-string">"EUR"</span>,
+  <span class="code-key">"enterprise_threshold"</span>: <span class="code-number">20</span>,
+  <span class="code-key">"sales_team"</span>: <span class="code-string">"sales_team_spain"</span>,
+  <span class="code-key">"trial_days"</span>: <span class="code-number">14</span>,
+  <span class="code-key">"messaging"</span>: {
+    <span class="code-key">"greeting"</span>: <span class="code-string">"Estimado/a"</span>,
+    <span class="code-key">"signature"</span>: <span class="code-string">"Equipo de Docplanner España"</span>,
+    <span class="code-key">"trial_cta"</span>: <span class="code-string">"Prueba gratuita de 14 días"</span>
+  }
+}</pre>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-8 mt-16">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <p class="text-gray-500 text-sm">Expansion Pipeline — Technical Documentation</p>
+            <p class="text-gray-400 text-xs mt-1">Docplanner Business Case • 2026</p>
+        </div>
+    </footer>
+
+    <script>
+        // Sidebar active state on scroll
+        const sections = document.querySelectorAll('section');
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (scrollY >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            sidebarLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Smooth scroll
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href');
+                document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
