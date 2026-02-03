@@ -167,6 +167,7 @@
         <a href="#insight" class="nav-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-dp-teal" data-section="insight"></a>
         <a href="#solution" class="nav-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-dp-teal" data-section="solution"></a>
         <a href="#how-it-works" class="nav-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-dp-teal" data-section="how-it-works"></a>
+        <a href="#tech-workflow" class="nav-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-dp-teal" data-section="tech-workflow"></a>
         <a href="#triggers" class="nav-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-dp-teal" data-section="triggers"></a>
         <a href="#ai-logic" class="nav-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-dp-teal" data-section="ai-logic"></a>
         <a href="#soft-sell" class="nav-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-dp-teal" data-section="soft-sell"></a>
@@ -501,7 +502,149 @@
         </div>
     </section>
 
-    <!-- Section 6: Expansion Triggers -->
+    <!-- Section 6: Technical Workflow -->
+    <section id="tech-workflow" class="min-h-screen bg-slate-900 text-white flex items-center py-20">
+        <div class="container mx-auto px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-16 fade-in">
+                    <p class="text-dp-teal font-semibold tracking-wider uppercase mb-4">Technical Integration</p>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6">System Workflow</h2>
+                    <p class="text-xl text-gray-400">How Salesforce, Zapier, and AI work together</p>
+                </div>
+                
+                <!-- Workflow Diagram -->
+                <div class="relative fade-in" style="transition-delay: 0.1s;">
+                    
+                    <!-- Main Flow -->
+                    <div class="flex flex-col items-center gap-4">
+                        
+                        <!-- Step 1: Customer Contact -->
+                        <div class="w-full max-w-md bg-slate-800 rounded-xl p-6 border border-slate-700 text-center">
+                            <div class="flex items-center justify-center gap-3 mb-3">
+                                <span class="text-2xl">👤</span>
+                                <span class="font-semibold text-lg">Customer Contact</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Phone, Chat, WhatsApp, Email</p>
+                        </div>
+                        
+                        <!-- Arrow -->
+                        <div class="flex flex-col items-center">
+                            <svg class="w-6 h-8 text-dp-teal" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(90 12 12)"/></svg>
+                        </div>
+                        
+                        <!-- Step 2: Salesforce -->
+                        <div class="w-full max-w-md bg-blue-900/50 rounded-xl p-6 border border-blue-500/50 text-center">
+                            <div class="flex items-center justify-center gap-3 mb-3">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Salesforce.com_logo.svg/1280px-Salesforce.com_logo.svg.png" alt="Salesforce" class="h-6 brightness-0 invert opacity-80">
+                            </div>
+                            <p class="font-semibold">Salesforce Service Cloud</p>
+                            <p class="text-sm text-gray-400 mt-1">Case Created → Triggers Automation</p>
+                        </div>
+                        
+                        <!-- Arrow -->
+                        <div class="flex flex-col items-center">
+                            <svg class="w-6 h-8 text-dp-teal" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(90 12 12)"/></svg>
+                        </div>
+                        
+                        <!-- Step 3: Zapier -->
+                        <div class="w-full max-w-md bg-orange-900/30 rounded-xl p-6 border border-orange-500/50 text-center">
+                            <div class="flex items-center justify-center gap-3 mb-3">
+                                <span class="text-2xl">⚡</span>
+                                <span class="font-semibold text-lg text-orange-400">Zapier</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Trigger: New Case in Salesforce</p>
+                            <p class="text-sm text-gray-400">Action: Send to AI for Classification</p>
+                        </div>
+                        
+                        <!-- Arrow -->
+                        <div class="flex flex-col items-center">
+                            <svg class="w-6 h-8 text-dp-teal" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(90 12 12)"/></svg>
+                        </div>
+                        
+                        <!-- Step 4: AI Classification -->
+                        <div class="w-full max-w-md bg-purple-900/30 rounded-xl p-6 border border-purple-500/50 text-center">
+                            <div class="flex items-center justify-center gap-3 mb-3">
+                                <span class="text-2xl">🤖</span>
+                                <span class="font-semibold text-lg text-purple-400">AI Classification</span>
+                                <span class="text-xs bg-purple-500/30 px-2 py-1 rounded">Gemini / Claude</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Analyzes ticket + customer context</p>
+                            <p class="text-sm text-gray-400">Returns structured JSON decision</p>
+                        </div>
+                        
+                        <!-- Arrow -->
+                        <div class="flex flex-col items-center">
+                            <svg class="w-6 h-8 text-dp-teal" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(90 12 12)"/></svg>
+                        </div>
+                        
+                        <!-- Step 5: Zapier Router -->
+                        <div class="w-full max-w-md bg-orange-900/30 rounded-xl p-6 border border-orange-500/50 text-center">
+                            <div class="flex items-center justify-center gap-3 mb-3">
+                                <span class="text-2xl">⚡</span>
+                                <span class="font-semibold text-lg text-orange-400">Zapier</span>
+                                <span class="text-xs bg-orange-500/30 px-2 py-1 rounded">Router</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Reads JSON response</p>
+                            <p class="text-sm text-gray-400">Routes based on intent + clinic size</p>
+                        </div>
+                        
+                        <!-- Arrow Split -->
+                        <div class="flex flex-col items-center">
+                            <svg class="w-6 h-8 text-dp-teal" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(90 12 12)"/></svg>
+                        </div>
+                        
+                        <!-- Step 6: Actions (Split) -->
+                        <div class="w-full grid md:grid-cols-2 gap-4">
+                            <div class="bg-emerald-900/30 rounded-xl p-6 border border-emerald-500/50 text-center">
+                                <div class="flex items-center justify-center gap-2 mb-3">
+                                    <span class="text-xl">🏪</span>
+                                    <span class="font-semibold text-emerald-400">Small Clinic</span>
+                                </div>
+                                <div class="space-y-2 text-sm text-gray-400">
+                                    <p>→ Generate soft-sell email (AI)</p>
+                                    <p>→ Send via Salesforce</p>
+                                    <p>→ Update Case status</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-blue-900/30 rounded-xl p-6 border border-blue-500/50 text-center">
+                                <div class="flex items-center justify-center gap-2 mb-3">
+                                    <span class="text-xl">🏢</span>
+                                    <span class="font-semibold text-blue-400">Enterprise</span>
+                                </div>
+                                <div class="space-y-2 text-sm text-gray-400">
+                                    <p>→ Create Lead in Salesforce</p>
+                                    <p>→ Assign to Sales Rep</p>
+                                    <p>→ Notify via Slack</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tools Summary -->
+                <div class="mt-16 grid md:grid-cols-3 gap-6 fade-in" style="transition-delay: 0.3s;">
+                    <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 text-center">
+                        <div class="text-3xl mb-3">☁️</div>
+                        <h4 class="font-semibold mb-2">Salesforce</h4>
+                        <p class="text-sm text-gray-400">Source of truth for Cases, Leads, Opportunities, and Customer Data</p>
+                    </div>
+                    <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 text-center">
+                        <div class="text-3xl mb-3">⚡</div>
+                        <h4 class="font-semibold mb-2">Zapier</h4>
+                        <p class="text-sm text-gray-400">Integration layer - connects systems, routes data, triggers actions</p>
+                    </div>
+                    <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 text-center">
+                        <div class="text-3xl mb-3">🤖</div>
+                        <h4 class="font-semibold mb-2">AI (Gemini/Claude)</h4>
+                        <p class="text-sm text-gray-400">Intelligence layer - classifies intent, generates responses</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 7: Expansion Triggers -->
     <section id="triggers" class="min-h-screen triggers-bg flex items-center py-20">
         <div class="container mx-auto px-6">
             <div class="max-w-6xl mx-auto">
