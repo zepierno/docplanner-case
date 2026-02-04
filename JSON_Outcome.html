@@ -56,6 +56,26 @@ h1 {
   margin-top: 50px;
 }
 
+    height: 340px;          /* altura fixa do painel */
+    max-height: 340px;
+    overflow-y: auto;       /* scroll vertical */
+    overflow-x: hidden;
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
+  #output {
+    white-space: pre-wrap;  /* quebra linhas longas */
+    word-break: break-word;
+    font-size: 13px;
+    line-height: 1.45;
+    color: #e5e7eb;
+    margin: 0;
+  }    
+
 /* LEFT SIDE */
 
 .explain-box {
@@ -178,6 +198,28 @@ pre {
   color: var(--accent);
   border: 1px solid rgba(56,232,198,0.4);
 }
+
+.json-container {
+    height: 340px;          /* altura fixa do painel */
+    max-height: 340px;
+    overflow-y: auto;       /* scroll vertical */
+    overflow-x: hidden;
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
+  #output {
+    white-space: pre-wrap;  /* quebra linhas longas */
+    word-break: break-word;
+    font-size: 13px;
+    line-height: 1.45;
+    color: #e5e7eb;
+    margin: 0;
+  }
+
 </style>
 </head>
 
@@ -240,7 +282,9 @@ I'm trying to do a video call with a patient but I can't find the button
 
       <button onclick="classify()">Run classification</button>
 
-      <pre id="output">{}</pre>
+      <div class="json-container">
+  <pre id="output">{}</pre>
+</div>
 
     </div>
 
