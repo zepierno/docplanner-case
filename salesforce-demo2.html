@@ -966,167 +966,66 @@ Docplanner Support Team`,
             const [newLeadId, setNewLeadId] = useState(null);
             const [createdCaseIds, setCreatedCaseIds] = useState([]);
             const [createdLeadIds, setCreatedLeadIds] = useState([]);
-            const [liveClassification, setLiveClassification] = useState(null);
-            const [apiMode, setApiMode] = useState('live'); // 'live' or 'fallback'
 
-            // Handle chat submission - NOW WITH LIVE API
-            const handleChatSubmit = async (message) => {
+            // Handle chat submission
+            const handleChatSubmit = (message) => {
                 setUserMessage(message);
+                const scenario = detectScenario(message);
+                setCurrentScenario(scenario);
                 setStage('processing');
-                setProcessingStage('receiving');
 
-                // Start processing animation
+                // Simulate AI processing stages
                 const stages = ['receiving', 'analyzing', 'classifying', 'evaluating', 'generating', 'routing', 'complete'];
                 let stageIndex = 0;
-                
-                const animationInterval = setInterval(() => {
-                    stageIndex++;
-                    if (stageIndex < stages.length - 1) {
-                        setProcessingStage(stages[stageIndex]);
-                    }
-                }, 500);
 
-                try {
-                    // Call the live API
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
-                    
-                    const response = await fetch("https://docplanner-case.onrender.com/classify", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ message }),
-                        signal: controller.signal
-                    });
-                    
-                    clearTimeout(timeoutId);
-                    const data = await response.json();
-                    
-                    // Normalize the API response to match our expected structure
-                    const normalizedClassification = {
-                        intent: data.intent || 'expansion',
-                        confidence: data.confidence || 0.90,
-                        product_interest: data.product_interest || 'video_calls',
-                        sentiment: data.sentiment || 'positive',
-                        triggers: data.triggers || {
-                            not_on_premium: true,
-                            onboarding_completed: true,
-                            no_active_incidents: true,
-                            high_engagement: true,
-                            good_standing: true,
-                            feature_discovery_attempts: true,
-                            positive_sentiment: true,
-                            usage_velocity_positive: false,
-                            multi_user_growth: false,
-                            contract_renewal_soon: false
-                        },
-                        triggers_met: data.triggers_met || 7,
-                        triggers_total: data.triggers_total || 10,
-                        recommended_action: data.recommended_action || 'auto_softsell',
-                        routing: data.routing || { team: 'expansion_auto', priority: 'high', sla_hours: 2 },
-                        reasoning: data.reasoning || 'Classification based on message content.'
-                    };
-                    
-                    setLiveClassification(normalizedClassification);
-                    setApiMode('live');
-                    
-                    // Determine scenario based on API response
-                    let detectedScenario = 'small_clinic';
-                    if (normalizedClassification.intent === 'training') {
-                        detectedScenario = 'training';
-                    } else if (normalizedClassification.recommended_action === 'sales_handoff' || 
-                               (normalizedClassification.routing && normalizedClassification.routing.team === 'enterprise_sales')) {
-                        detectedScenario = 'enterprise';
+                const interval = setInterval(() => {
+                    stageIndex++;
+                    if (stageIndex < stages.length) {
+                        setProcessingStage(stages[stageIndex]);
+                    } else {
+                        clearInterval(interval);
+                        setTimeout(() => setStage('json'), 500);
                     }
-                    setCurrentScenario(detectedScenario);
-                    
-                    clearInterval(animationInterval);
-                    setProcessingStage('complete');
-                    setTimeout(() => setStage('json'), 500);
-                    
-                } catch (error) {
-                    console.log('API call failed, using fallback:', error);
-                    
-                    // Fallback to keyword-based detection
-                    const scenario = detectScenario(message);
-                    setCurrentScenario(scenario);
-                    setLiveClassification(null);
-                    setApiMode('fallback');
-                    
-                    clearInterval(animationInterval);
-                    setProcessingStage('complete');
-                    setTimeout(() => setStage('json'), 500);
-                }
+                }, 600);
             };
 
             // Handle continue to Salesforce
             const handleContinueToSalesforce = () => {
                 const scenarioData = scenarios[currentScenario];
-                const classification = liveClassification || scenarioData.classification;
-                
-                // Determine case subject from user message or scenario
-                let caseSubject = userMessage.substring(0, 50);
-                if (caseSubject.length >= 50) caseSubject += '...';
-                
-                // Determine type based on classification
-                const caseType = classification.intent || scenarioData.classification.intent;
-                const isEnterprise = classification.recommended_action === 'sales_handoff' || 
-                                    (classification.routing && classification.routing.team === 'enterprise_sales');
-                
-                // Determine next step based on classification
-                let nextStep = scenarioData.nextStep;
-                if (liveClassification) {
-                    if (classification.recommended_action === 'auto_softsell') {
-                        nextStep = 'Auto Soft-Sell Sent';
-                    } else if (classification.recommended_action === 'sales_handoff') {
-                        nextStep = 'Assigned to Sales';
-                    } else if (classification.recommended_action === 'send_tutorial') {
-                        nextStep = 'Tutorial Sent';
-                    } else if (classification.recommended_action === 'escalate_tech') {
-                        nextStep = 'Escalate to Tech';
-                    } else {
-                        nextStep = 'Standard Reply';
-                    }
-                }
                 
                 // Create new case
-                const caseIdNum = 12853 + createdCaseIds.length;
                 const newCase = {
-                    id: `CS-${caseIdNum}`,
-                    subject: caseSubject,
+                    id: scenarioData.caseId,
+                    subject: currentScenario === 'small_clinic' 
+                        ? "Can't find video call button" 
+                        : currentScenario === 'enterprise'
+                        ? 'Telemedicine for 127 practitioners'
+                        : 'How to export patient list?',
                     clinic: scenarioData.clinicName,
-                    type: caseType,
-                    size: isEnterprise ? 'enterprise' : 'small',
+                    type: scenarioData.classification.intent,
+                    size: scenarioData.practitioners >= 20 ? 'enterprise' : 'small',
                     status: 'New',
                     created: 'Just now',
-                    priority: classification.routing?.priority === 'high' ? 'High' : 'Medium',
-                    nextStep: nextStep
+                    priority: 'High',
+                    nextStep: scenarioData.nextStep
                 };
 
                 setCases(prev => [newCase, ...prev]);
-                setNewCaseId(`CS-${caseIdNum}`);
-                setCreatedCaseIds(prev => [...prev, `CS-${caseIdNum}`]);
+                setNewCaseId(scenarioData.caseId);
+                setCreatedCaseIds(prev => [...prev, scenarioData.caseId]);
 
                 // Create lead if expansion
-                if (caseType === 'expansion') {
+                if (scenarioData.classification.intent === 'expansion') {
                     const newLeadIdValue = `LD-${5521 + leads.length}`;
-                    
-                    // Calculate lead value based on size
-                    let leadValue = scenarioData.leadValue;
-                    if (liveClassification && isEnterprise) {
-                        leadValue = '€48,000/yr';
-                    } else if (liveClassification) {
-                        leadValue = '€2,400/yr';
-                    }
-                    
                     const newLead = {
                         id: newLeadIdValue,
                         clinic: scenarioData.clinicName,
                         contact: scenarioData.customerName,
                         email: scenarioData.customerName.toLowerCase().replace('dr. ', '').replace(' ', '.') + '@clinic.es',
-                        value: leadValue,
+                        value: scenarioData.leadValue,
                         status: 'New',
                         source: 'Support Expansion Signal',
-                        assigned: isEnterprise ? 'María González' : 'Auto-assigned',
+                        assigned: currentScenario === 'enterprise' ? 'María González' : 'Auto-assigned',
                         created: 'Just now',
                         converted: false
                     };
@@ -1174,8 +1073,6 @@ Docplanner Support Team`,
                 setCreatedCaseIds([]);
                 setCreatedLeadIds([]);
                 setCurrentView('cases');
-                setLiveClassification(null);
-                setApiMode('live');
             };
 
             return (
@@ -1187,10 +1084,6 @@ Docplanner Support Team`,
                                 <span className="text-xl font-bold">🚀 Expansion Pipeline</span>
                                 <span className="text-slate-400">|</span>
                                 <span className="text-slate-300 text-sm">Interactive Demo</span>
-                                <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-full flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
-                                    Live API
-                                </span>
                             </div>
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-2 text-sm">
@@ -1244,19 +1137,9 @@ Docplanner Support Team`,
                             <div className="text-center mb-8">
                                 <h1 className="text-3xl font-bold text-gray-800 mb-2">Classification Complete</h1>
                                 <p className="text-gray-600">AI has classified the ticket and determined the next action</p>
-                                {apiMode === 'live' && (
-                                    <span className="inline-block mt-2 text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">
-                                        ✓ Live API Response
-                                    </span>
-                                )}
-                                {apiMode === 'fallback' && (
-                                    <span className="inline-block mt-2 text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded-full">
-                                        ⚡ Fallback Mode
-                                    </span>
-                                )}
                             </div>
                             <JSONOutput 
-                                classification={liveClassification || scenarios[currentScenario].classification} 
+                                classification={scenarios[currentScenario].classification} 
                                 onContinue={handleContinueToSalesforce}
                             />
                         </div>
