@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Salesforce Service Console - Docplanner Expansion Pipeline</title>
+    <title>Interactive Demo - Docplanner Expansion Pipeline</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
@@ -13,41 +13,218 @@
         .sf-blue { background-color: #0176d3; }
         .sf-blue-dark { background-color: #014486; }
         .sf-blue-text { color: #0176d3; }
+        .dp-teal { background-color: #00b39b; }
+        .dp-teal-text { color: #00b39b; }
         .animate-fade-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes typing { from { width: 0; } to { width: 100%; } }
+        @keyframes blink { 50% { border-color: transparent; } }
+        .animate-pulse { animation: pulse 1.5s ease-in-out infinite; }
         .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
         .debug-panel { font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; }
+        .typing-effect { overflow: hidden; white-space: nowrap; border-right: 2px solid #00b39b; animation: typing 2s steps(40, end), blink 0.75s step-end infinite; }
+        .json-key { color: #7dd3fc; }
+        .json-string { color: #86efac; }
+        .json-number { color: #fbbf24; }
+        .json-boolean { color: #c084fc; }
+        .chat-bubble-user { background: linear-gradient(135deg, #00b39b 0%, #009681 100%); }
+        .chat-bubble-bot { background: #f1f5f9; }
+        .processing-dot { animation: pulse 1s ease-in-out infinite; }
+        .processing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .processing-dot:nth-child(3) { animation-delay: 0.4s; }
     </style>
 </head>
 <body class="bg-gray-100">
     <div id="root"></div>
     
     <script type="text/babel">
-        const { useState } = React;
+        const { useState, useEffect, useRef } = React;
 
-        // Mock Data
-        const cases = [
-            { id: 'CS-12847', subject: "Can't find video call button", clinic: 'Clínica Dental Sonrisa', type: 'expansion', size: 'small', status: 'New', created: '2 min ago', priority: 'High', nextStep: 'Auto Soft-Sell Sent' },
-            { id: 'CS-12848', subject: 'Telemedicine feature not working', clinic: 'Hospital Universitario Madrid', type: 'expansion', size: 'enterprise', status: 'New', created: '5 min ago', priority: 'High', nextStep: 'Assigned to Sales' },
-            { id: 'CS-12849', subject: 'How to export patient list?', clinic: 'Centro Médico Valencia', type: 'training', size: 'small', status: 'New', created: '12 min ago', priority: 'Medium', nextStep: 'Send Tutorial Link' },
-            { id: 'CS-12850', subject: 'Calendar sync error with Google', clinic: 'Fisioterapia Barcelona', type: 'bug', size: 'small', status: 'New', created: '18 min ago', priority: 'High', nextStep: 'Escalate to Tech' },
-            { id: 'CS-12851', subject: 'Need help setting up appointments', clinic: 'Clínica Oftalmológica Sur', type: 'reonboarding', size: 'small', status: 'New', created: '25 min ago', priority: 'Medium', nextStep: 'Schedule Re-onboarding' },
-            { id: 'CS-12852', subject: 'General question about pricing', clinic: 'Dentista Plus', type: 'general', size: 'small', status: 'New', created: '30 min ago', priority: 'Low', nextStep: 'Standard Reply' },
+        // ==================== SCENARIO CONFIGURATIONS ====================
+        const scenarios = {
+            small_clinic: {
+                keywords: ['video', 'videollamada', 'llamada', 'telemedicina', 'boton', 'button', 'paciente', 'remoto', 'consulta online'],
+                customerName: 'Dr. Carlos Mendoza',
+                clinicName: 'Clínica Dental Sonrisa',
+                practitioners: 2,
+                currentPlan: 'Basic',
+                caseId: 'CS-12853',
+                classification: {
+                    intent: 'expansion',
+                    confidence: 0.94,
+                    product_interest: 'video_calls',
+                    sentiment: 'positive',
+                    triggers: {
+                        not_on_premium: true,
+                        onboarding_completed: true,
+                        no_active_incidents: true,
+                        high_engagement: true,
+                        good_standing: true,
+                        feature_discovery_attempts: true,
+                        positive_sentiment: true,
+                        usage_velocity_positive: false,
+                        multi_user_growth: false,
+                        contract_renewal_soon: false
+                    },
+                    triggers_met: 7,
+                    triggers_total: 10,
+                    recommended_action: 'auto_softsell',
+                    routing: {
+                        team: 'expansion_auto',
+                        priority: 'high',
+                        sla_hours: 2
+                    },
+                    reasoning: 'Customer on Basic plan actively seeking video call feature. Positive sentiment, high engagement. Small clinic (2 practitioners) - suitable for automated soft-sell flow.'
+                },
+                autoReply: `Dear Dr. Mendoza,
+
+Thank you for reaching out! I completely understand — video consultations have become essential for many clinics, especially when patients prefer the convenience of remote appointments.
+
+I wanted to clarify that video consultation is a feature included in our Premium Suite, which is why you're not seeing the button in your current dashboard. This isn't a bug — it's simply a capability we haven't unlocked for your plan yet.
+
+The Premium Suite includes everything you need for telemedicine:
+✓ HD Video Calls directly in the patient profile
+✓ Screen sharing for test results and images
+✓ Automatic appointment reminders for video sessions
+✓ Recording capabilities (with patient consent)
+
+Would you like me to send you more details about the Premium Suite? You can also start a 14-day free trial directly from your dashboard to see if it fits your clinic's needs — no commitment required.
+
+Best regards,
+Docplanner Support Team`,
+                nextStep: 'Auto Soft-Sell Sent',
+                leadValue: '€2,400/yr'
+            },
+            enterprise: {
+                keywords: ['hospital', 'enterprise', '127', 'practitioners', 'departamentos', 'departments', 'integracion', 'integration', 'multiple', 'varios'],
+                customerName: 'Dr. Elena Ruiz',
+                clinicName: 'Hospital Universitario Madrid',
+                practitioners: 127,
+                currentPlan: 'Basic',
+                caseId: 'CS-12854',
+                classification: {
+                    intent: 'expansion',
+                    confidence: 0.97,
+                    product_interest: 'premium_suite',
+                    sentiment: 'positive',
+                    triggers: {
+                        not_on_premium: true,
+                        onboarding_completed: true,
+                        no_active_incidents: true,
+                        high_engagement: true,
+                        good_standing: true,
+                        feature_discovery_attempts: true,
+                        positive_sentiment: true,
+                        usage_velocity_positive: true,
+                        multi_user_growth: true,
+                        contract_renewal_soon: false
+                    },
+                    triggers_met: 9,
+                    triggers_total: 10,
+                    recommended_action: 'sales_handoff',
+                    routing: {
+                        team: 'enterprise_sales',
+                        priority: 'high',
+                        sla_hours: 2
+                    },
+                    reasoning: 'Enterprise hospital (127 practitioners) explicitly requesting telemedicine solution. High-value opportunity requiring consultative sales approach. Create Lead and assign to Enterprise Sales immediately.'
+                },
+                autoReply: `Dear Dr. Ruiz,
+
+Thank you for contacting us. Implementing telemedicine across a large hospital like Hospital Universitario Madrid is an exciting initiative, and I'm glad you're considering Docplanner for this.
+
+Given the scale of your needs — 127 practitioners across multiple departments — this is exactly the kind of project our Enterprise Solutions team specializes in.
+
+I've connected you with María González, our Enterprise Account Executive, who will reach out within the next 2 hours to discuss:
+• Custom telemedicine implementation for your hospital's workflow
+• Integration options with your existing systems
+• Volume-based pricing designed for institutions your size
+• Dedicated onboarding and ongoing support
+
+María has extensive experience with healthcare institutions and will be your dedicated point of contact throughout this process. In the meantime, I'm happy to answer any immediate questions you might have.
+
+Best regards,
+Docplanner Support Team`,
+                nextStep: 'Assigned to Sales',
+                leadValue: '€48,000/yr'
+            },
+            training: {
+                keywords: ['exportar', 'export patient', 'export list', 'excel', 'descargar lista', 'download list', 'como exporto', 'how do i export', 'accountant', 'contador'],
+                customerName: 'Dr. Pablo Torres',
+                clinicName: 'Centro Médico Valencia',
+                practitioners: 3,
+                currentPlan: 'Premium',
+                caseId: 'CS-12855',
+                classification: {
+                    intent: 'training',
+                    confidence: 0.91,
+                    product_interest: null,
+                    sentiment: 'neutral',
+                    triggers: {
+                        not_on_premium: false,
+                        onboarding_completed: true,
+                        no_active_incidents: true,
+                        high_engagement: true,
+                        good_standing: true,
+                        feature_discovery_attempts: false,
+                        positive_sentiment: false,
+                        usage_velocity_positive: false,
+                        multi_user_growth: false,
+                        contract_renewal_soon: false
+                    },
+                    triggers_met: 0,
+                    triggers_total: 10,
+                    recommended_action: 'send_tutorial',
+                    routing: {
+                        team: 'support_l1',
+                        priority: 'medium',
+                        sla_hours: 24
+                    },
+                    reasoning: 'Customer asking how to use existing feature (export). Already on Premium plan. Send tutorial link for patient export functionality.'
+                },
+                autoReply: `Dear Dr. Torres,
+
+Thank you for your question! Exporting your patient list is easy:
+
+1. Go to "Patients" in the main menu
+2. Click the "Export" button (top right)
+3. Select the format (Excel, CSV, or PDF)
+4. Choose which fields to include
+5. Click "Download"
+
+Here's a quick video tutorial that walks you through the process:
+📹 https://help.docplanner.com/export-patients
+
+If you need any further assistance, feel free to reach out!
+
+Best regards,
+Docplanner Support Team`,
+                nextStep: 'Tutorial Sent',
+                leadValue: null
+            }
+        };
+
+        // ==================== INITIAL MOCK DATA ====================
+        const initialCases = [
+            { id: 'CS-12847', subject: "Can't find video call button", clinic: 'Clínica Salud Plus', type: 'expansion', size: 'small', status: 'Resolved', created: '1 hour ago', priority: 'High', nextStep: 'Auto Soft-Sell Sent' },
+            { id: 'CS-12848', subject: 'Telemedicine for 50 practitioners', clinic: 'Centro Médico Regional', type: 'expansion', size: 'enterprise', status: 'Resolved', created: '2 hours ago', priority: 'High', nextStep: 'Assigned to Sales' },
+            { id: 'CS-12849', subject: 'How to export patient list?', clinic: 'Fisioterapia Barcelona', type: 'training', size: 'small', status: 'Resolved', created: '3 hours ago', priority: 'Medium', nextStep: 'Tutorial Sent' },
+            { id: 'CS-12850', subject: 'Calendar sync error with Google', clinic: 'Dental Care Madrid', type: 'bug', size: 'small', status: 'Open', created: '4 hours ago', priority: 'High', nextStep: 'Escalate to Tech' },
+            { id: 'CS-12851', subject: 'Need help setting up appointments', clinic: 'Clínica Oftalmológica Sur', type: 'reonboarding', size: 'small', status: 'Open', created: '5 hours ago', priority: 'Medium', nextStep: 'Schedule Re-onboarding' },
         ];
 
-        const leads = [
-            { id: 'LD-5521', clinic: 'Clínica Dental Sonrisa', contact: 'Dr. Carlos Mendoza', email: 'carlos.mendoza@dentalsonrisa.es', value: '€2,400/yr', status: 'New', source: 'Support Expansion Signal', assigned: 'Auto-assigned', created: '2 min ago', converted: false },
-            { id: 'LD-5520', clinic: 'Hospital Universitario Madrid', contact: 'Dr. Elena Ruiz', email: 'elena.ruiz@hum.es', value: '€48,000/yr', status: 'Qualified', source: 'Support Expansion Signal', assigned: 'María González', created: '5 min ago', converted: true },
-            { id: 'LD-5519', clinic: 'Centro Wellness Sevilla', contact: 'Dr. Pablo Torres', email: 'pablo.torres@wellness-sevilla.es', value: '€3,600/yr', status: 'Contacted', source: 'Support Expansion Signal', assigned: 'Auto-assigned', created: '1 hour ago', converted: false },
+        const initialLeads = [
+            { id: 'LD-5520', clinic: 'Centro Médico Regional', contact: 'Dr. Ana García', email: 'ana.garcia@cmr.es', value: '€24,000/yr', status: 'Qualified', source: 'Support Expansion Signal', assigned: 'María González', created: '2 hours ago', converted: false },
+            { id: 'LD-5519', clinic: 'Clínica Salud Plus', contact: 'Dr. Miguel Santos', email: 'miguel.santos@saludplus.es', value: '€2,400/yr', status: 'New', source: 'Support Expansion Signal', assigned: 'Auto-assigned', created: '1 hour ago', converted: false },
         ];
 
-        const opportunities = [
-            { id: 'OPP-2847', clinic: 'Hospital Universitario Madrid', contact: 'Dr. Elena Ruiz', value: '€48,000/yr', stage: 'Qualification', probability: '75%', closeDate: 'Mar 15, 2026', source: 'Support Signal', owner: 'María González', leadId: 'LD-5520', caseId: 'CS-12848' },
+        const initialOpportunities = [
+            { id: 'OPP-2847', clinic: 'Red Salud Valencia', contact: 'Dra. Ana Moreno', value: '€24,000/yr', stage: 'Negotiation', probability: '85%', closeDate: 'Feb 10, 2026', source: 'Support Signal', owner: 'María González', leadId: 'LD-5498', caseId: 'CS-12756' },
             { id: 'OPP-2839', clinic: 'Clínica Premium Barcelona', contact: 'Dr. Martín Álvarez', value: '€12,000/yr', stage: 'Proposal', probability: '60%', closeDate: 'Feb 28, 2026', source: 'Support Signal', owner: 'Carlos Ruiz', leadId: 'LD-5512', caseId: 'CS-12801' },
-            { id: 'OPP-2831', clinic: 'Red Salud Valencia', contact: 'Dra. Ana Moreno', value: '€24,000/yr', stage: 'Negotiation', probability: '85%', closeDate: 'Feb 10, 2026', source: 'Support Signal', owner: 'María González', leadId: 'LD-5498', caseId: 'CS-12756' },
         ];
 
-        // Helper functions
+        // ==================== HELPER FUNCTIONS ====================
         const getTypeConfig = (type) => {
             const configs = {
                 expansion: { label: 'Expansion Opportunity', color: 'bg-emerald-500', icon: '🎯', textColor: 'text-emerald-700', bgLight: 'bg-emerald-50', borderColor: 'border-emerald-500' },
@@ -56,36 +233,278 @@
                 reonboarding: { label: 'Re-onboarding Needed', color: 'bg-amber-500', icon: '🔄', textColor: 'text-amber-700', bgLight: 'bg-amber-50', borderColor: 'border-amber-500' },
                 general: { label: 'General Inquiry', color: 'bg-slate-500', icon: '💬', textColor: 'text-slate-700', bgLight: 'bg-slate-50', borderColor: 'border-slate-500' },
             };
-            return configs[type];
+            return configs[type] || configs.general;
         };
 
-        const getPriorityColor = (priority) => {
-            const colors = { High: 'text-red-600', Medium: 'text-amber-600', Low: 'text-slate-500' };
-            return colors[priority] || 'text-slate-500';
+        const detectScenario = (message) => {
+            const lowerMessage = message.toLowerCase();
+            
+            // Check enterprise first (most specific - large numbers, hospital, departments)
+            if (scenarios.enterprise.keywords.some(kw => lowerMessage.includes(kw))) {
+                return 'enterprise';
+            }
+            // Check small clinic second (video calls, telemedicine requests)
+            if (scenarios.small_clinic.keywords.some(kw => lowerMessage.includes(kw))) {
+                return 'small_clinic';
+            }
+            // Check training last (how-to questions, export, etc.)
+            if (scenarios.training.keywords.some(kw => lowerMessage.includes(kw))) {
+                return 'training';
+            }
+            // Fallback to small clinic
+            return 'small_clinic';
         };
 
-        const getNextStepStyle = (type) => {
-            const styles = {
-                expansion: 'bg-emerald-100 text-emerald-800',
-                training: 'bg-blue-100 text-blue-800',
-                bug: 'bg-red-100 text-red-800',
-                reonboarding: 'bg-amber-100 text-amber-800',
-                general: 'bg-slate-100 text-slate-800',
+        // ==================== CHAT COMPONENT ====================
+        const ChatInterface = ({ onSubmit, isProcessing }) => {
+            const [message, setMessage] = useState('');
+            const [chatHistory, setChatHistory] = useState([
+                { type: 'system', text: 'Welcome to Docplanner Support. How can I help you today?' }
+            ]);
+
+            const handleSubmit = () => {
+                if (!message.trim() || isProcessing) return;
+                
+                setChatHistory(prev => [...prev, { type: 'user', text: message }]);
+                onSubmit(message);
+                setMessage('');
             };
-            return styles[type] || 'bg-slate-100 text-slate-800';
-        };
 
-        const getStageStyle = (stage) => {
-            const styles = {
-                'Qualification': 'bg-blue-50 text-blue-700 border-blue-200',
-                'Proposal': 'bg-amber-50 text-amber-700 border-amber-200',
-                'Negotiation': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+            const handleKeyPress = (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit();
+                }
             };
-            return styles[stage] || 'bg-slate-50 text-slate-700 border-slate-200';
+
+            const exampleMessages = [
+                { label: '🏪 Small Clinic', text: "Hello, I'm trying to do a video call with a patient but I can't find the button anywhere. Can you help me?" },
+                { label: '🏢 Enterprise', text: "We need telemedicine capabilities for our hospital. We have 127 practitioners across multiple departments and need integration with our systems." },
+                { label: '📚 Training', text: "How do I export my patient list to Excel? I need to send it to my accountant." }
+            ];
+
+            return (
+                <div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-lg mx-auto">
+                    {/* Chat Header */}
+                    <div className="dp-teal text-white px-6 py-4">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                                <span className="text-xl">💬</span>
+                            </div>
+                            <div>
+                                <h3 className="font-semibold">Docplanner Support</h3>
+                                <p className="text-sm text-white/80">We typically reply within minutes</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Chat Messages */}
+                    <div className="h-64 overflow-y-auto p-4 space-y-3 bg-gray-50">
+                        {chatHistory.map((msg, idx) => (
+                            <div key={idx} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                <div className={`max-w-[80%] px-4 py-2 rounded-2xl ${
+                                    msg.type === 'user' 
+                                        ? 'chat-bubble-user text-white rounded-br-md' 
+                                        : msg.type === 'system'
+                                        ? 'chat-bubble-bot text-gray-700 rounded-bl-md'
+                                        : 'chat-bubble-bot text-gray-700 rounded-bl-md'
+                                }`}>
+                                    <p className="text-sm">{msg.text}</p>
+                                </div>
+                            </div>
+                        ))}
+                        {isProcessing && (
+                            <div className="flex justify-start">
+                                <div className="chat-bubble-bot px-4 py-3 rounded-2xl rounded-bl-md">
+                                    <div className="flex gap-1">
+                                        <div className="w-2 h-2 bg-gray-400 rounded-full processing-dot"></div>
+                                        <div className="w-2 h-2 bg-gray-400 rounded-full processing-dot"></div>
+                                        <div className="w-2 h-2 bg-gray-400 rounded-full processing-dot"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Example Buttons */}
+                    <div className="px-4 py-2 border-t border-gray-100 bg-white">
+                        <p className="text-xs text-gray-500 mb-2">Try an example:</p>
+                        <div className="flex flex-wrap gap-2">
+                            {exampleMessages.map((ex, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setMessage(ex.text)}
+                                    disabled={isProcessing}
+                                    className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700 transition-colors disabled:opacity-50"
+                                >
+                                    {ex.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Input */}
+                    <div className="p-4 border-t border-gray-200 bg-white">
+                        <div className="flex gap-2">
+                            <textarea
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                                placeholder="Type your message..."
+                                disabled={isProcessing}
+                                className="flex-1 px-4 py-2 border border-gray-300 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:bg-gray-100"
+                                rows={2}
+                            />
+                            <button
+                                onClick={handleSubmit}
+                                disabled={!message.trim() || isProcessing}
+                                className="px-4 py-2 dp-teal text-white rounded-xl font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Send
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
         };
 
-        // Header Component
-        const SalesforceHeader = ({ currentView, setCurrentView }) => (
+        // ==================== AI PROCESSING COMPONENT ====================
+        const AIProcessing = ({ stage, scenario }) => {
+            const stages = [
+                { key: 'receiving', label: 'Receiving message...', icon: '📨' },
+                { key: 'analyzing', label: 'Analyzing content & context...', icon: '🔍' },
+                { key: 'classifying', label: 'Classifying intent...', icon: '🤖' },
+                { key: 'evaluating', label: 'Evaluating expansion triggers...', icon: '📊' },
+                { key: 'generating', label: 'Generating response...', icon: '✍️' },
+                { key: 'routing', label: 'Determining routing...', icon: '🎯' },
+                { key: 'complete', label: 'Classification complete!', icon: '✅' },
+            ];
+
+            const currentIndex = stages.findIndex(s => s.key === stage);
+
+            return (
+                <div className="bg-slate-900 rounded-2xl p-6 max-w-lg mx-auto shadow-xl">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                            <span className="text-xl">🤖</span>
+                        </div>
+                        <div>
+                            <h3 className="text-white font-semibold">AI Classification Engine</h3>
+                            <p className="text-slate-400 text-sm">Processing support ticket...</p>
+                        </div>
+                    </div>
+
+                    <div className="space-y-3">
+                        {stages.map((s, idx) => (
+                            <div 
+                                key={s.key}
+                                className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-300 ${
+                                    idx < currentIndex 
+                                        ? 'bg-emerald-500/20 text-emerald-400' 
+                                        : idx === currentIndex 
+                                        ? 'bg-blue-500/20 text-blue-400 animate-pulse' 
+                                        : 'bg-slate-800 text-slate-500'
+                                }`}
+                            >
+                                <span>{idx < currentIndex ? '✓' : s.icon}</span>
+                                <span className="text-sm">{s.label}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // ==================== JSON OUTPUT COMPONENT ====================
+        const JSONOutput = ({ classification, onContinue }) => {
+            const [showFull, setShowFull] = useState(false);
+
+            const formatJSON = (obj, indent = 0) => {
+                const spaces = '  '.repeat(indent);
+                let result = '';
+                
+                if (typeof obj === 'object' && obj !== null) {
+                    const isArray = Array.isArray(obj);
+                    result += isArray ? '[\n' : '{\n';
+                    
+                    const entries = Object.entries(obj);
+                    entries.forEach(([key, value], idx) => {
+                        const comma = idx < entries.length - 1 ? ',' : '';
+                        if (isArray) {
+                            result += `${spaces}  ${formatJSON(value, indent + 1)}${comma}\n`;
+                        } else {
+                            result += `${spaces}  <span class="json-key">"${key}"</span>: ${formatJSON(value, indent + 1)}${comma}\n`;
+                        }
+                    });
+                    
+                    result += spaces + (isArray ? ']' : '}');
+                } else if (typeof obj === 'string') {
+                    result = `<span class="json-string">"${obj}"</span>`;
+                } else if (typeof obj === 'number') {
+                    result = `<span class="json-number">${obj}</span>`;
+                } else if (typeof obj === 'boolean') {
+                    result = `<span class="json-boolean">${obj}</span>`;
+                } else if (obj === null) {
+                    result = `<span class="json-boolean">null</span>`;
+                }
+                
+                return result;
+            };
+
+            // Simplified version for display
+            const simplifiedClassification = {
+                intent: classification.intent,
+                confidence: classification.confidence,
+                product_interest: classification.product_interest,
+                sentiment: classification.sentiment,
+                triggers_met: classification.triggers_met,
+                triggers_total: classification.triggers_total,
+                recommended_action: classification.recommended_action,
+                routing: classification.routing,
+                reasoning: classification.reasoning.substring(0, 80) + '...'
+            };
+
+            return (
+                <div className="bg-slate-900 rounded-2xl p-6 max-w-2xl mx-auto shadow-xl animate-fade-in">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                            <div className="flex gap-1.5">
+                                <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                            </div>
+                            <span className="text-slate-400 text-sm">AI Classification Response</span>
+                        </div>
+                        <button
+                            onClick={() => setShowFull(!showFull)}
+                            className="text-xs text-slate-400 hover:text-white transition-colors"
+                        >
+                            {showFull ? 'Show Less' : 'Show Full JSON'}
+                        </button>
+                    </div>
+                    
+                    <pre 
+                        className="text-sm overflow-x-auto text-slate-300 debug-panel"
+                        dangerouslySetInnerHTML={{ 
+                            __html: formatJSON(showFull ? classification : simplifiedClassification) 
+                        }}
+                    />
+
+                    <div className="mt-6 flex justify-center">
+                        <button
+                            onClick={onContinue}
+                            className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl transition-colors flex items-center gap-2"
+                        >
+                            Continue to Salesforce
+                            <span>→</span>
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // ==================== SALESFORCE COMPONENTS ====================
+        const SalesforceHeader = ({ currentView, setCurrentView, newCaseId }) => (
             <header className="sf-blue text-white shadow-lg">
                 <div className="flex items-center justify-between px-4 py-3">
                     <div className="flex items-center gap-6">
@@ -107,16 +526,16 @@
                                 <button 
                                     key={item.key}
                                     onClick={() => setCurrentView(item.key)}
-                                    className={`px-5 py-2 rounded-t text-sm font-medium transition-all ${
-                                        (currentView.startsWith('case') && item.key === 'cases') || 
-                                        (currentView.startsWith('lead') && item.key === 'leads') ||
-                                        (currentView.startsWith('opportunit') && item.key === 'opportunities') ||
-                                        currentView === item.key
+                                    className={`px-5 py-2 rounded-t text-sm font-medium transition-all relative ${
+                                        currentView === item.key || currentView.startsWith(item.key.slice(0, 4))
                                             ? 'bg-white text-blue-700 shadow' 
                                             : 'hover:bg-blue-600 text-blue-100'
                                     }`}
                                 >
                                     {item.label}
+                                    {item.key === 'cases' && newCaseId && (
+                                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+                                    )}
                                 </button>
                             ))}
                         </nav>
@@ -131,7 +550,10 @@
                             <span className="absolute right-3 top-2.5 text-blue-200">🔍</span>
                         </div>
                         <div className="flex items-center gap-3">
-                            <button className="text-blue-200 hover:text-white">🔔</button>
+                            <button className="text-blue-200 hover:text-white relative">
+                                🔔
+                                {newCaseId && <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>}
+                            </button>
                             <div className="w-9 h-9 bg-orange-400 rounded-full flex items-center justify-center text-sm font-semibold shadow">AG</div>
                         </div>
                     </div>
@@ -139,566 +561,336 @@
             </header>
         );
 
-        // AI Classification Banner
-        const AIClassificationBanner = ({ type, confidence, size }) => {
-            const config = getTypeConfig(type);
-            if (type !== 'expansion') return null;
-            
-            return (
-                <div className={`${config.bgLight} border-l-4 ${config.borderColor} p-4 rounded-r-lg mb-4 animate-fade-in shadow-sm`}>
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <span className="text-3xl">{config.icon}</span>
-                            <div>
-                                <div className="flex items-center gap-3">
-                                    <span className={`font-bold text-lg ${config.textColor}`}>{config.label}</span>
-                                    <span className="badge bg-emerald-600 text-white">AI Confidence: {confidence}%</span>
-                                </div>
-                                <p className="text-sm text-slate-600 mt-1">
-                                    {size === 'small' 
-                                        ? '✨ Small clinic detected → Automated soft-sell flow triggered'
-                                        : '🏢 Enterprise account detected → Lead created for Sales team'
-                                    }
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            {size === 'small' ? (
-                                <span className="badge bg-blue-100 text-blue-800">✉️ Auto-reply Sent</span>
-                            ) : (
-                                <span className="badge bg-purple-100 text-purple-800">👤 Assigned to Sales</span>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // Expansion Triggers Component
-        const ExpansionTriggers = ({ triggers }) => (
-            <div className="bg-white rounded-lg shadow-sm border mb-4 animate-fade-in">
-                <div className="px-4 py-3 border-b bg-slate-50">
-                    <h3 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                        <span>⚡</span> Expansion Triggers Analysis
-                    </h3>
-                </div>
-                <div className="p-4">
-                    <div className="grid grid-cols-2 gap-2">
-                        {triggers.map((trigger, i) => (
-                            <div key={i} className={`flex items-center gap-2 p-3 rounded-lg ${trigger.met ? 'bg-emerald-50 border border-emerald-200' : 'bg-red-50 border border-red-200'}`}>
-                                <span className={`text-lg ${trigger.met ? 'text-emerald-600' : 'text-red-500'}`}>{trigger.met ? '✓' : '✗'}</span>
-                                <span className="text-sm font-medium">{trigger.label}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        );
-
-        // AI Debug Panel
-        const AIDebugPanel = ({ isSmall }) => {
-            const [isExpanded, setIsExpanded] = useState(false);
-            
-            const jsonOutput = {
-                intent: "expansion",
-                product: "premium_suite",
-                confidence: 0.94,
-                action: isSmall ? "auto_softsell" : "sales_handoff",
-                triggers_met: 6,
-                triggers_total: 6
-            };
-
-            return (
-                <div className="bg-slate-800 rounded-lg shadow-sm border border-slate-700 mb-4 animate-fade-in overflow-hidden">
-                    <button 
-                        onClick={() => setIsExpanded(!isExpanded)}
-                        className="w-full px-4 py-3 flex items-center justify-between bg-slate-900 hover:bg-slate-800 transition-colors"
-                    >
-                        <div className="flex items-center gap-3">
-                            <span className="text-amber-400">⚙️</span>
-                            <span className="text-sm font-semibold text-slate-300">AI Classification Debug Output</span>
-                            <span className="badge bg-amber-900/50 text-amber-400 text-xs border border-amber-700">For Development Reference Only</span>
-                        </div>
-                        <span className="text-slate-400 text-sm">{isExpanded ? '▼ Hide' : '▶ Show'}</span>
-                    </button>
-                    
-                    {isExpanded && (
-                        <div className="p-4 debug-panel">
-                            <div className="flex items-start gap-3 mb-3">
-                                <span className="text-amber-400 text-xs mt-1">ℹ️</span>
-                                <p className="text-xs text-slate-400">
-                                    This panel shows the structured JSON output from the AI classification system. 
-                                    Used for auditing, debugging, and ensuring decision transparency.
-                                </p>
-                            </div>
-                            <pre className="text-xs text-emerald-400 bg-slate-950 p-3 rounded border border-slate-700 overflow-x-auto">
-{`// AI Classification Response
-{
-  "intent": "${jsonOutput.intent}",
-  "product": "${jsonOutput.product}",
-  "confidence": ${jsonOutput.confidence},
-  "action": "${jsonOutput.action}",
-  "triggers_met": ${jsonOutput.triggers_met},
-  "triggers_total": ${jsonOutput.triggers_total}
-}`}
-                            </pre>
-                        </div>
-                    )}
-                </div>
-            );
-        };
-
-        // Auto Reply Preview
-        const AutoReplyPreview = ({ size }) => {
-            const smallClinicReply = `Dear Dr. Mendoza,
-
-Thank you for reaching out! I understand you're looking for video consultation capabilities.
-
-Great news! Video consultations are available with our Premium Suite, which includes:
-✓ HD Video Calls with patients
-✓ Screen sharing for test results
-✓ Automatic appointment reminders
-✓ Recording capabilities (with consent)
-
-Based on your clinic's profile, you'd be eligible for a special upgrade offer.
-
-Would you like me to send you more details about the Premium Suite? You can also start a 14-day free trial directly from your dashboard.
-
-Best regards,
-Docplanner Support Team`;
-
-            const enterpriseReply = `Dear Dr. Ruiz,
-
-Thank you for contacting us. I understand you're interested in telemedicine features for Hospital Universitario Madrid.
-
-I've connected you with María González from our Enterprise Solutions team, who specializes in healthcare institutions of your scale. She will reach out within the next 2 hours to discuss:
-
-• Custom telemedicine implementation
-• Integration with your existing systems
-• Volume-based pricing for 50+ practitioners
-• Dedicated support and training
-
-In the meantime, I'm happy to answer any immediate questions.
-
-Best regards,
-Docplanner Support Team`;
-
-            return (
-                <div className="bg-white rounded-lg shadow-sm border mb-4 animate-fade-in">
-                    <div className="px-4 py-3 border-b bg-blue-50">
-                        <h3 className="text-sm font-semibold text-blue-800 flex items-center gap-2">
-                            <span>✉️</span> {size === 'small' ? 'Auto-Reply Sent to Customer' : 'Notification Sent to Customer'}
-                        </h3>
-                    </div>
-                    <div className="p-4">
-                        <pre className="text-xs bg-slate-50 p-4 rounded-lg whitespace-pre-wrap font-sans text-slate-700 max-h-56 overflow-y-auto border">
-                            {size === 'small' ? smallClinicReply : enterpriseReply}
-                        </pre>
-                    </div>
-                </div>
-            );
-        };
-
-        // Cases List Component
-        const CasesList = ({ onSelectCase }) => (
+        const CasesListView = ({ cases, onSelectCase, newCaseId, createdCaseIds }) => (
             <div className="p-6 animate-fade-in">
                 <div className="flex items-center justify-between mb-6">
-                    <div>
-                        <h1 className="text-2xl font-bold text-slate-800">Cases</h1>
-                        <p className="text-slate-500">Support queue with AI classification</p>
-                    </div>
-                    <div className="flex gap-2">
-                        <span className="badge bg-emerald-50 text-emerald-700 border border-emerald-200">🎯 Expansion: 2</span>
-                        <span className="badge bg-blue-50 text-blue-700 border border-blue-200">📚 Training: 1</span>
-                        <span className="badge bg-red-50 text-red-700 border border-red-200">🐛 Bug: 1</span>
-                        <span className="badge bg-amber-50 text-amber-700 border border-amber-200">🔄 Re-onboard: 1</span>
+                    <h2 className="text-xl font-bold text-gray-800">Support Cases Queue</h2>
+                    <div className="flex items-center gap-2 text-sm text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
+                        <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                        AI Classification Active
                     </div>
                 </div>
-                
-                <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+
+                <div className="bg-white rounded-xl shadow overflow-hidden">
                     <table className="w-full">
-                        <thead className="bg-slate-50 border-b">
+                        <thead className="bg-gray-50 border-b">
                             <tr>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Case #</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Subject</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Account</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">AI Classification</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Priority</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Next Step</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Created</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Action</th>
+                                <th className="text-left p-4 font-semibold text-gray-600 text-sm">Case Number</th>
+                                <th className="text-left p-4 font-semibold text-gray-600 text-sm">Subject</th>
+                                <th className="text-left p-4 font-semibold text-gray-600 text-sm">Clinic</th>
+                                <th className="text-left p-4 font-semibold text-gray-600 text-sm">AI Classification</th>
+                                <th className="text-left p-4 font-semibold text-gray-600 text-sm">Next Step</th>
+                                <th className="text-left p-4 font-semibold text-gray-600 text-sm">Created</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {cases.map((c, idx) => {
-                                const typeConfig = getTypeConfig(c.type);
+                            {cases.map((c) => {
+                                const config = getTypeConfig(c.type);
+                                const isNew = c.id === newCaseId;
+                                const isClickable = createdCaseIds.includes(c.id);
                                 return (
-                                    <tr key={c.id} className={`border-b hover:bg-blue-50 transition-colors cursor-pointer ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
-                                        <td className="p-4">
-                                            <button 
-                                                onClick={() => c.type === 'expansion' && onSelectCase(c.size)}
-                                                className="sf-blue-text hover:underline font-semibold"
-                                            >
-                                                {c.id}
-                                            </button>
-                                        </td>
-                                        <td className="p-4 text-sm text-slate-700 font-medium">{c.subject}</td>
-                                        <td className="p-4 text-sm text-slate-600">{c.clinic}</td>
+                                    <tr 
+                                        key={c.id} 
+                                        onClick={() => isClickable && onSelectCase(c)}
+                                        className={`border-b transition-colors ${isNew ? 'bg-emerald-50 animate-fade-in' : ''} ${isClickable ? 'hover:bg-blue-50 cursor-pointer' : 'opacity-70'}`}
+                                    >
                                         <td className="p-4">
                                             <div className="flex items-center gap-2">
-                                                <div className={`w-2.5 h-2.5 rounded-full ${typeConfig.color}`}></div>
-                                                <span className={`text-sm font-medium ${typeConfig.textColor}`}>{typeConfig.icon} {typeConfig.label}</span>
+                                                {isNew && <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>}
+                                                <span className="sf-blue-text font-medium">{c.id}</span>
                                             </div>
                                         </td>
+                                        <td className="p-4 text-gray-700">{c.subject}</td>
+                                        <td className="p-4 text-gray-600">{c.clinic}</td>
                                         <td className="p-4">
-                                            <span className={`text-sm font-semibold ${getPriorityColor(c.priority)}`}>{c.priority}</span>
+                                            <span className={`badge ${config.color} text-white`}>
+                                                {config.icon} {config.label}
+                                            </span>
                                         </td>
                                         <td className="p-4">
-                                            <span className={`badge ${getNextStepStyle(c.type)} text-xs`}>
+                                            <span className={`badge ${config.bgLight} ${config.textColor}`}>
                                                 {c.nextStep}
                                             </span>
                                         </td>
-                                        <td className="p-4 text-sm text-slate-500">{c.created}</td>
-                                        <td className="p-4">
-                                            <button 
-                                                onClick={() => c.type === 'expansion' && onSelectCase(c.size)}
-                                                className="px-3 py-1.5 text-xs font-medium sf-blue text-white rounded hover:bg-blue-700 transition-colors"
-                                            >
-                                                Open
-                                            </button>
-                                        </td>
+                                        <td className="p-4 text-gray-500 text-sm">{c.created}</td>
                                     </tr>
                                 );
                             })}
                         </tbody>
                     </table>
                 </div>
-                
-                <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                    <p className="text-sm text-amber-800">
-                        <strong>💡 Demo Tip:</strong> Click on <strong>CS-12847</strong> (small clinic) or <strong>CS-12848</strong> (enterprise) to see the AI-powered expansion detection in action!
-                    </p>
-                </div>
             </div>
         );
 
-        // Case Detail Component
-        const CaseDetail = ({ size, onBack, onViewLead }) => {
-            const isSmall = size === 'small';
-            const caseData = isSmall ? cases[0] : cases[1];
+        const CaseDetailView = ({ caseData, scenario, onBack, onViewLead }) => {
+            const config = getTypeConfig(caseData.type);
+            const scenarioData = scenarios[scenario];
             
-            const clinicInfo = isSmall ? {
-                name: 'Clínica Dental Sonrisa',
-                contact: 'Dr. Carlos Mendoza',
-                email: 'carlos.mendoza@dentalsonrisa.es',
-                phone: '+34 612 345 678',
-                plan: 'Basic',
-                practitioners: '2',
-                customerSince: 'March 2023',
-                onboardingStatus: 'Completed',
-                engagement: 85,
-                lastLogin: '2 hours ago',
-            } : {
-                name: 'Hospital Universitario Madrid',
-                contact: 'Dr. Elena Ruiz (Head of Digital)',
-                email: 'elena.ruiz@hum.es',
-                phone: '+34 910 123 456',
-                plan: 'Basic',
-                practitioners: '127',
-                customerSince: 'January 2022',
-                onboardingStatus: 'Completed',
-                engagement: 92,
-                lastLogin: '30 min ago',
-            };
-            
-            const triggers = [
-                { label: 'Not on Premium plan', met: true },
-                { label: 'Onboarding completed', met: true },
-                { label: 'High engagement score (>70%)', met: clinicInfo.engagement > 70 },
-                { label: 'No active incidents', met: true },
-                { label: 'Feature request intent detected', met: true },
-                { label: 'Account in good standing', met: true },
-            ];
-
             return (
                 <div className="p-6 animate-fade-in">
-                    <div className="flex items-center gap-3 mb-4">
-                        <button onClick={onBack} className="flex items-center gap-1 text-slate-600 hover:text-slate-800 font-medium">
-                            ← Back to Cases
-                        </button>
-                        <span className="text-slate-300">|</span>
-                        <span className="text-slate-500 text-sm">Case {caseData.id}</span>
-                        <span className="badge bg-blue-100 text-blue-700">Open</span>
-                    </div>
-                    
-                    <AIClassificationBanner type="expansion" confidence={94} size={size} />
-                    
+                    <button onClick={onBack} className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4">
+                        ← Back to Cases
+                    </button>
+
                     <div className="grid grid-cols-3 gap-6">
                         {/* Main Content */}
-                        <div className="col-span-2 space-y-4">
-                            <div className="bg-white rounded-lg shadow-sm border">
-                                <div className="px-4 py-3 border-b">
-                                    <h2 className="text-lg font-semibold text-slate-800">{caseData.subject}</h2>
+                        <div className="col-span-2 space-y-6">
+                            {/* AI Classification Banner */}
+                            <div className={`${config.bgLight} border-l-4 ${config.borderColor} p-4 rounded-r-lg shadow-sm`}>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-2xl">{config.icon}</span>
+                                        <div>
+                                            <span className={`font-semibold ${config.textColor}`}>{config.label}</span>
+                                            <span className="text-gray-500 text-sm ml-2">• {(scenarioData.classification.confidence * 100).toFixed(0)}% confidence</span>
+                                        </div>
+                                    </div>
+                                    {caseData.type === 'expansion' && (
+                                        <span className={`badge ${caseData.size === 'enterprise' ? 'bg-purple-100 text-purple-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                                            {caseData.size === 'enterprise' ? '🏢 Enterprise' : '🏪 Small Clinic'}
+                                        </span>
+                                    )}
                                 </div>
-                                <div className="p-4">
-                                    <div className="bg-slate-50 p-4 rounded-lg border">
-                                        <p className="text-sm text-slate-600 mb-1"><strong>From:</strong> {clinicInfo.contact} &lt;{clinicInfo.email}&gt;</p>
-                                        <p className="text-sm text-slate-600 mb-3"><strong>Received:</strong> {caseData.created}</p>
-                                        <hr className="my-3" />
-                                        <p className="text-slate-700 leading-relaxed">
-                                            {isSmall 
-                                                ? "Hello, I'm trying to do a video call with a patient but I can't find the button anywhere in the dashboard. I've looked in the appointments section and the patient profile but there's no video option. Can you help me? We have several patients who would prefer remote consultations."
-                                                : "Hi, we're looking to implement telemedicine capabilities across our hospital departments. We currently use your platform for appointment scheduling but need video consultation features for our 127 practitioners. Can you provide information about enterprise video solutions and integration with our existing hospital systems?"
-                                            }
-                                        </p>
+                            </div>
+
+                            {/* Case Info Card */}
+                            <div className="bg-white rounded-xl shadow p-6">
+                                <h2 className="text-xl font-bold text-gray-800 mb-4">{caseData.subject}</h2>
+                                
+                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                    <div>
+                                        <p className="text-sm text-gray-500">Case Number</p>
+                                        <p className="font-medium">{caseData.id}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Status</p>
+                                        <p className="font-medium">{caseData.status}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Priority</p>
+                                        <p className="font-medium text-red-600">{caseData.priority}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Created</p>
+                                        <p className="font-medium">{caseData.created}</p>
+                                    </div>
+                                </div>
+
+                                <div className="border-t pt-4">
+                                    <p className="text-sm text-gray-500 mb-2">Customer Message:</p>
+                                    <div className="bg-gray-50 rounded-lg p-4 text-gray-700">
+                                        {scenario === 'small_clinic' && "Hello, I'm trying to do a video call with a patient but I can't find the button anywhere. Can you help me?"}
+                                        {scenario === 'enterprise' && "We need telemedicine capabilities for our hospital. We have 127 practitioners across multiple departments and need integration with our systems."}
+                                        {scenario === 'training' && "How do I export my patient list to Excel? I need to send it to my accountant."}
                                     </div>
                                 </div>
                             </div>
-                            
-                            <ExpansionTriggers triggers={triggers} />
-                            
-                            <AutoReplyPreview size={size} />
-                            
-                            {!isSmall && (
-                                <div className="bg-purple-50 rounded-lg shadow-sm border border-purple-200 animate-fade-in">
-                                    <div className="px-4 py-3 border-b border-purple-200">
-                                        <h3 className="text-sm font-semibold text-purple-800 flex items-center gap-2">
-                                            <span>🔔</span> Sales Notification Sent
-                                        </h3>
+
+                            {/* Auto-Reply Preview */}
+                            <div className="bg-white rounded-xl shadow p-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="font-semibold text-gray-800">
+                                        {caseData.type === 'expansion' && caseData.size === 'enterprise' ? '📧 Notification Sent to Customer' : '📧 Auto-Reply Sent'}
+                                    </h3>
+                                    <span className="badge bg-emerald-100 text-emerald-700">✓ Sent</span>
+                                </div>
+                                <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 whitespace-pre-line max-h-64 overflow-y-auto">
+                                    {scenarioData.autoReply}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Sidebar */}
+                        <div className="space-y-6">
+                            {/* Account Info */}
+                            <div className="bg-white rounded-xl shadow p-6">
+                                <h3 className="font-semibold text-gray-800 mb-4">Account Information</h3>
+                                <div className="space-y-3">
+                                    <div>
+                                        <p className="text-sm text-gray-500">Clinic</p>
+                                        <p className="font-medium">{scenarioData.clinicName}</p>
                                     </div>
-                                    <div className="p-4">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className="text-sm text-purple-700">Lead <strong>LD-5520</strong> created and assigned to <strong>María González</strong></p>
-                                                <p className="text-xs text-purple-600 mt-1">Estimated deal value: €48,000/year</p>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Contact</p>
+                                        <p className="font-medium">{scenarioData.customerName}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Current Plan</p>
+                                        <p className="font-medium">{scenarioData.currentPlan}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Practitioners</p>
+                                        <p className="font-medium">{scenarioData.practitioners}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Expansion Triggers */}
+                            {caseData.type === 'expansion' && (
+                                <div className="bg-white rounded-xl shadow p-6">
+                                    <h3 className="font-semibold text-gray-800 mb-4">Expansion Triggers</h3>
+                                    <div className="space-y-2">
+                                        {Object.entries(scenarioData.classification.triggers).map(([key, value]) => (
+                                            <div key={key} className="flex items-center justify-between text-sm">
+                                                <span className="text-gray-600">{key.replace(/_/g, ' ')}</span>
+                                                <span className={value ? 'text-emerald-600' : 'text-gray-400'}>{value ? '✓' : '✗'}</span>
                                             </div>
-                                            <button onClick={onViewLead} className="px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded hover:bg-purple-700 transition-colors">
-                                                View Lead →
-                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="mt-4 pt-4 border-t">
+                                        <div className="flex justify-between items-center">
+                                            <span className="font-medium">Triggers Met</span>
+                                            <span className="font-bold text-emerald-600">{scenarioData.classification.triggers_met}/{scenarioData.classification.triggers_total}</span>
                                         </div>
                                     </div>
                                 </div>
                             )}
-                            
-                            <AIDebugPanel isSmall={isSmall} />
-                        </div>
-                        
-                        {/* Sidebar */}
-                        <div className="space-y-4">
-                            <div className="bg-white rounded-lg shadow-sm border">
-                                <div className="px-4 py-3 border-b bg-slate-50">
-                                    <h3 className="text-sm font-semibold text-slate-700">Account Information</h3>
+
+                            {/* Action Buttons */}
+                            {caseData.type === 'expansion' && (
+                                <div className="bg-white rounded-xl shadow p-6">
+                                    <h3 className="font-semibold text-gray-800 mb-4">Actions</h3>
+                                    <button 
+                                        onClick={onViewLead}
+                                        className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                                    >
+                                        View Created Lead →
+                                    </button>
                                 </div>
-                                <div className="p-4 space-y-3 text-sm">
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Account</span>
-                                        <span className="font-medium sf-blue-text">{clinicInfo.name}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Contact</span>
-                                        <span className="text-right">{clinicInfo.contact}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Current Plan</span>
-                                        <span className="badge bg-slate-100 text-slate-700">{clinicInfo.plan}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Practitioners</span>
-                                        <span className="font-semibold">{clinicInfo.practitioners}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Customer Since</span>
-                                        <span>{clinicInfo.customerSince}</span>
-                                    </div>
-                                    <hr />
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-slate-500">Onboarding</span>
-                                        <span className="badge bg-emerald-100 text-emerald-800">{clinicInfo.onboardingStatus}</span>
-                                    </div>
-                                    <div>
-                                        <div className="flex justify-between mb-1">
-                                            <span className="text-slate-500">Engagement Score</span>
-                                            <span className="font-semibold text-emerald-600">{clinicInfo.engagement}%</span>
-                                        </div>
-                                        <div className="w-full bg-slate-200 rounded-full h-2">
-                                            <div className="bg-emerald-500 h-2 rounded-full transition-all" style={{width: `${clinicInfo.engagement}%`}}></div>
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Last Login</span>
-                                        <span>{clinicInfo.lastLogin}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div className="bg-white rounded-lg shadow-sm border">
-                                <div className="px-4 py-3 border-b bg-slate-50">
-                                    <h3 className="text-sm font-semibold text-slate-700">🤖 AI Analysis Summary</h3>
-                                </div>
-                                <div className="p-4 space-y-3">
-                                    <div className="p-3 bg-slate-50 rounded-lg">
-                                        <span className="text-xs text-slate-500 uppercase">Intent Detected</span>
-                                        <p className="font-semibold text-emerald-700">Feature Request - Video Consultation</p>
-                                    </div>
-                                    <div className="p-3 bg-slate-50 rounded-lg">
-                                        <span className="text-xs text-slate-500 uppercase">Recommended Action</span>
-                                        <p className="font-semibold">{isSmall ? 'Automated Soft-Sell' : 'Sales Handoff'}</p>
-                                    </div>
-                                    <div className="p-3 bg-slate-50 rounded-lg">
-                                        <span className="text-xs text-slate-500 uppercase">Confidence Score</span>
-                                        <p className="font-semibold text-emerald-600">94%</p>
-                                    </div>
-                                </div>
-                            </div>
+                            )}
                         </div>
                     </div>
                 </div>
             );
         };
 
-        // Lead Detail Component
-        const LeadDetail = ({ onBack, onViewOpportunity }) => {
-            const lead = leads[1]; // Hospital Universitario Madrid
+        const LeadsListView = ({ leads, onSelectLead, newLeadId, createdLeadIds }) => (
+            <div className="p-6 animate-fade-in">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-gray-800">Expansion Leads</h2>
+                    <span className="text-sm text-gray-500">{leads.length} leads from Support signals</span>
+                </div>
+
+                <div className="bg-white rounded-xl shadow overflow-hidden">
+                    <table className="w-full">
+                        <thead className="bg-gray-50 border-b">
+                            <tr>
+                                <th className="text-left p-4 font-semibold text-gray-600 text-sm">Lead ID</th>
+                                <th className="text-left p-4 font-semibold text-gray-600 text-sm">Clinic</th>
+                                <th className="text-left p-4 font-semibold text-gray-600 text-sm">Contact</th>
+                                <th className="text-left p-4 font-semibold text-gray-600 text-sm">Value</th>
+                                <th className="text-left p-4 font-semibold text-gray-600 text-sm">Status</th>
+                                <th className="text-left p-4 font-semibold text-gray-600 text-sm">Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {leads.map((lead) => {
+                                const isNew = lead.id === newLeadId;
+                                const isClickable = createdLeadIds.includes(lead.id);
+                                return (
+                                    <tr 
+                                        key={lead.id}
+                                        onClick={() => isClickable && onSelectLead(lead)}
+                                        className={`border-b transition-colors ${isNew ? 'bg-emerald-50 animate-fade-in' : ''} ${isClickable ? 'hover:bg-blue-50 cursor-pointer' : 'opacity-70'}`}
+                                    >
+                                        <td className="p-4">
+                                            <div className="flex items-center gap-2">
+                                                {isNew && <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>}
+                                                <span className="sf-blue-text font-medium">{lead.id}</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-4 text-gray-700">{lead.clinic}</td>
+                                        <td className="p-4 text-gray-600">{lead.contact}</td>
+                                        <td className="p-4 font-semibold text-emerald-600">{lead.value}</td>
+                                        <td className="p-4">
+                                            <span className={`badge ${lead.status === 'New' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                                                {lead.status}
+                                            </span>
+                                        </td>
+                                        <td className="p-4 text-gray-500 text-sm">{lead.created}</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+
+        const LeadDetailView = ({ lead, scenario, onBack, onConvert }) => {
+            const scenarioData = scenario ? scenarios[scenario] : null;
             
             return (
                 <div className="p-6 animate-fade-in">
-                    <div className="flex items-center gap-3 mb-6">
-                        <button onClick={onBack} className="flex items-center gap-1 text-slate-600 hover:text-slate-800 font-medium">
-                            ← Back to Leads
-                        </button>
-                        <span className="text-slate-300">|</span>
-                        <span className="text-slate-500 text-sm">Lead {lead.id}</span>
-                        <span className="badge bg-emerald-100 text-emerald-700">Qualified</span>
-                    </div>
-                    
+                    <button onClick={onBack} className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4">
+                        ← Back to Leads
+                    </button>
+
                     <div className="grid grid-cols-3 gap-6">
-                        <div className="col-span-2 space-y-4">
-                            <div className="bg-white rounded-lg shadow-sm border">
-                                <div className="px-4 py-3 border-b flex items-center justify-between">
-                                    <h2 className="text-xl font-bold text-slate-800">{lead.clinic}</h2>
-                                    <span className="badge bg-purple-100 text-purple-800">{lead.source}</span>
+                        <div className="col-span-2 space-y-6">
+                            <div className="bg-white rounded-xl shadow p-6">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-xl font-bold text-gray-800">{lead.clinic}</h2>
+                                    <span className={`badge ${lead.status === 'New' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                                        {lead.status}
+                                    </span>
                                 </div>
-                                <div className="p-4">
-                                    <div className="grid grid-cols-2 gap-4 mb-6">
-                                        <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-                                            <p className="text-2xl font-bold text-emerald-600">{lead.value}</p>
-                                            <p className="text-sm text-slate-500">Estimated Annual Value</p>
-                                        </div>
-                                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                            <p className="text-2xl font-bold sf-blue-text">127</p>
-                                            <p className="text-sm text-slate-500">Practitioners</p>
-                                        </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-sm text-gray-500">Lead ID</p>
+                                        <p className="font-medium">{lead.id}</p>
                                     </div>
-                                    
-                                    <hr className="my-4" />
-                                    
-                                    <div className="space-y-3">
-                                        <h3 className="font-semibold text-slate-700">📋 Lead History</h3>
-                                        <div className="space-y-3 ml-2">
-                                            <div className="flex items-start gap-3">
-                                                <div className="w-3 h-3 rounded-full bg-purple-500 mt-1.5"></div>
-                                                <div>
-                                                    <p className="text-sm font-medium text-slate-700">Created from Support Case CS-12848</p>
-                                                    <p className="text-xs text-slate-500">Today, 10:15 AM - AI Classification: Expansion Opportunity (94%)</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-start gap-3">
-                                                <div className="w-3 h-3 rounded-full bg-blue-500 mt-1.5"></div>
-                                                <div>
-                                                    <p className="text-sm font-medium text-slate-700">Auto-assigned to María González (Enterprise Sales)</p>
-                                                    <p className="text-xs text-slate-500">Today, 10:15 AM - Based on account size and region</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-start gap-3">
-                                                <div className="w-3 h-3 rounded-full bg-emerald-500 mt-1.5"></div>
-                                                <div>
-                                                    <p className="text-sm font-medium text-slate-700">Lead qualified by Sales</p>
-                                                    <p className="text-xs text-slate-500">Today, 11:30 AM - Ready for conversion</p>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Contact</p>
+                                        <p className="font-medium">{lead.contact}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Email</p>
+                                        <p className="font-medium text-blue-600">{lead.email}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Estimated Value</p>
+                                        <p className="font-bold text-emerald-600 text-lg">{lead.value}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Source</p>
+                                        <p className="font-medium">{lead.source}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Assigned To</p>
+                                        <p className="font-medium">{lead.assigned}</p>
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div className="bg-blue-50 rounded-lg shadow-sm border border-blue-200">
-                                <div className="px-4 py-3 border-b border-blue-200">
-                                    <h3 className="text-sm font-semibold text-blue-800 flex items-center gap-2">
-                                        <span>💬</span> Original Support Request
-                                    </h3>
+
+                            {scenarioData && (
+                                <div className="bg-white rounded-xl shadow p-6">
+                                    <h3 className="font-semibold text-gray-800 mb-4">Original Support Request</h3>
+                                    <div className="bg-gray-50 rounded-lg p-4 text-gray-700">
+                                        {scenario === 'small_clinic' && "Hello, I'm trying to do a video call with a patient but I can't find the button anywhere. Can you help me?"}
+                                        {scenario === 'enterprise' && "We need telemedicine capabilities for our hospital. We have 127 practitioners across multiple departments and need integration with our systems."}
+                                    </div>
                                 </div>
-                                <div className="p-4">
-                                    <p className="text-sm text-slate-700 italic">
-                                        "Hi, we're looking to implement telemedicine capabilities across our hospital departments. We currently use your platform for appointment scheduling but need video consultation features for our 127 practitioners..."
-                                    </p>
-                                    <p className="text-xs text-slate-500 mt-2">From Case CS-12848 • Received 5 min ago</p>
-                                </div>
-                            </div>
-                            
-                            <div className="flex gap-3">
-                                <button 
-                                    onClick={onViewOpportunity}
-                                    className="flex-1 px-4 py-3 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors"
-                                >
-                                    ✓ Convert to Opportunity
-                                </button>
-                                <button className="px-4 py-3 bg-slate-200 text-slate-700 font-medium rounded-lg hover:bg-slate-300 transition-colors">
-                                    Schedule Call
-                                </button>
-                            </div>
+                            )}
                         </div>
-                        
-                        {/* Sidebar */}
-                        <div className="space-y-4">
-                            <div className="bg-white rounded-lg shadow-sm border">
-                                <div className="px-4 py-3 border-b bg-slate-50">
-                                    <h3 className="text-sm font-semibold text-slate-700">Contact Information</h3>
-                                </div>
-                                <div className="p-4 space-y-3 text-sm">
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Name</span>
-                                        <span className="font-medium">{lead.contact}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Email</span>
-                                        <span className="sf-blue-text">{lead.email}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Phone</span>
-                                        <span>+34 910 123 456</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Role</span>
-                                        <span>Head of Digital</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div className="bg-white rounded-lg shadow-sm border">
-                                <div className="px-4 py-3 border-b bg-slate-50">
-                                    <h3 className="text-sm font-semibold text-slate-700">Lead Details</h3>
-                                </div>
-                                <div className="p-4 space-y-3 text-sm">
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Status</span>
-                                        <span className="badge bg-emerald-100 text-emerald-700">Qualified</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Owner</span>
-                                        <span>María González</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Source</span>
-                                        <span className="badge bg-purple-100 text-purple-800 text-xs">Support Signal</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Original Case</span>
-                                        <span className="sf-blue-text">CS-12848</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Created</span>
-                                        <span>{lead.created}</span>
-                                    </div>
+
+                        <div className="space-y-6">
+                            <div className="bg-white rounded-xl shadow p-6">
+                                <h3 className="font-semibold text-gray-800 mb-4">Actions</h3>
+                                <div className="space-y-3">
+                                    <button 
+                                        onClick={onConvert}
+                                        className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors"
+                                    >
+                                        Convert to Opportunity
+                                    </button>
+                                    <button className="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
+                                        Send Email
+                                    </button>
+                                    <button className="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
+                                        Schedule Call
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -707,437 +899,307 @@ Docplanner Support Team`;
             );
         };
 
-        // Leads List Component
-        const LeadsList = ({ onSelectLead, onViewOpportunity }) => (
+        const OpportunitiesListView = ({ opportunities }) => (
             <div className="p-6 animate-fade-in">
                 <div className="flex items-center justify-between mb-6">
-                    <div>
-                        <h1 className="text-2xl font-bold text-slate-800">Leads</h1>
-                        <p className="text-slate-500">Expansion opportunities from Support signals</p>
-                    </div>
-                    <span className="badge bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-1">
-                        ✨ 3 New from Support this week
+                    <h2 className="text-xl font-bold text-gray-800">Opportunities Pipeline</h2>
+                    <span className="text-sm font-semibold text-emerald-600">
+                        Total: €{opportunities.reduce((sum, o) => sum + parseInt(o.value.replace(/[^0-9]/g, '')), 0).toLocaleString()}/yr
                     </span>
                 </div>
-                
-                <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-                    <table className="w-full">
-                        <thead className="bg-slate-50 border-b">
-                            <tr>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Lead #</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Account</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Contact</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Est. Value</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Status</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Source</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Assigned To</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {leads.map((lead, idx) => (
-                                <tr key={lead.id} className={`border-b hover:bg-blue-50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
-                                    <td className="p-4">
-                                        <button 
-                                            className="sf-blue-text hover:underline font-semibold" 
-                                            onClick={() => lead.id === 'LD-5520' ? onSelectLead() : null}
-                                        >
-                                            {lead.id}
-                                        </button>
-                                    </td>
-                                    <td className="p-4 text-sm text-slate-700 font-medium">{lead.clinic}</td>
-                                    <td className="p-4 text-sm text-slate-600">{lead.contact}</td>
-                                    <td className="p-4 text-sm font-bold text-emerald-700">{lead.value}</td>
-                                    <td className="p-4">
-                                        <span className={`badge ${
-                                            lead.status === 'New' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
-                                            lead.status === 'Qualified' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                                            'bg-amber-50 text-amber-700 border border-amber-200'
-                                        }`}>
-                                            {lead.status}
-                                        </span>
-                                    </td>
-                                    <td className="p-4">
-                                        <span className="badge bg-purple-100 text-purple-800 text-xs">
-                                            {lead.source}
-                                        </span>
-                                    </td>
-                                    <td className="p-4 text-sm text-slate-600">{lead.assigned}</td>
-                                    <td className="p-4">
-                                        {lead.converted ? (
-                                            <button 
-                                                onClick={onViewOpportunity} 
-                                                className="px-3 py-1.5 text-xs font-medium bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors"
-                                            >
-                                                View Opp
-                                            </button>
-                                        ) : (
-                                            <button className="px-3 py-1.5 text-xs font-medium sf-blue text-white rounded hover:bg-blue-700 transition-colors">
-                                                {lead.status === 'New' ? 'Qualify' : 'Follow Up'}
-                                            </button>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                        <strong>💡 Note:</strong> Only <strong>LD-5520 (Hospital Universitario Madrid)</strong> has been converted to an Opportunity. Click on it to see the full lead details, or click "View Opp" to see the converted opportunity.
-                    </p>
-                </div>
-            </div>
-        );
 
-        // Opportunities List Component (NEW)
-        const OpportunitiesList = ({ onSelectOpportunity }) => (
-            <div className="p-6 animate-fade-in">
-                <div className="flex items-center justify-between mb-6">
-                    <div>
-                        <h1 className="text-2xl font-bold text-slate-800">Opportunities</h1>
-                        <p className="text-slate-500">Pipeline from Support expansion signals</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <div className="text-right">
-                            <p className="text-2xl font-bold text-emerald-600">€84,000</p>
-                            <p className="text-xs text-slate-500">Total Pipeline Value</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                <div className="bg-white rounded-xl shadow overflow-hidden">
                     <table className="w-full">
-                        <thead className="bg-slate-50 border-b">
+                        <thead className="bg-gray-50 border-b">
                             <tr>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Opp #</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Account</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Contact</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Value</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Stage</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Probability</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Close Date</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Owner</th>
-                                <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Action</th>
+                                <th className="text-left p-4 font-semibold text-gray-600 text-sm">Opportunity</th>
+                                <th className="text-left p-4 font-semibold text-gray-600 text-sm">Clinic</th>
+                                <th className="text-left p-4 font-semibold text-gray-600 text-sm">Value</th>
+                                <th className="text-left p-4 font-semibold text-gray-600 text-sm">Stage</th>
+                                <th className="text-left p-4 font-semibold text-gray-600 text-sm">Probability</th>
+                                <th className="text-left p-4 font-semibold text-gray-600 text-sm">Close Date</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {opportunities.map((opp, idx) => (
-                                <tr key={opp.id} className={`border-b hover:bg-blue-50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
+                            {opportunities.map((opp) => (
+                                <tr key={opp.id} className="border-b hover:bg-blue-50 cursor-pointer transition-colors">
                                     <td className="p-4">
-                                        <button 
-                                            className="sf-blue-text hover:underline font-semibold" 
-                                            onClick={() => opp.id === 'OPP-2847' && onSelectOpportunity()}
-                                        >
-                                            {opp.id}
-                                        </button>
+                                        <span className="sf-blue-text font-medium">{opp.id}</span>
                                     </td>
-                                    <td className="p-4 text-sm text-slate-700 font-medium">{opp.clinic}</td>
-                                    <td className="p-4 text-sm text-slate-600">{opp.contact}</td>
-                                    <td className="p-4 text-sm font-bold text-emerald-700">{opp.value}</td>
+                                    <td className="p-4 text-gray-700">{opp.clinic}</td>
+                                    <td className="p-4 font-semibold text-emerald-600">{opp.value}</td>
                                     <td className="p-4">
-                                        <span className={`badge border ${getStageStyle(opp.stage)}`}>
+                                        <span className={`badge border ${
+                                            opp.stage === 'Qualification' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                            opp.stage === 'Proposal' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                                            'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                        }`}>
                                             {opp.stage}
                                         </span>
                                     </td>
-                                    <td className="p-4 text-sm font-semibold text-slate-700">{opp.probability}</td>
-                                    <td className="p-4 text-sm text-slate-600">{opp.closeDate}</td>
-                                    <td className="p-4 text-sm text-slate-600">{opp.owner}</td>
-                                    <td className="p-4">
-                                        <button 
-                                            onClick={() => opp.id === 'OPP-2847' && onSelectOpportunity()}
-                                            className="px-3 py-1.5 text-xs font-medium sf-blue text-white rounded hover:bg-blue-700 transition-colors"
-                                        >
-                                            View
-                                        </button>
-                                    </td>
+                                    <td className="p-4 text-gray-600">{opp.probability}</td>
+                                    <td className="p-4 text-gray-500 text-sm">{opp.closeDate}</td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
-                
-                <div className="mt-6 grid grid-cols-3 gap-4">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-1">
-                            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                            <span className="text-sm font-semibold text-blue-800">Qualification</span>
-                        </div>
-                        <p className="text-2xl font-bold text-blue-700">€48,000</p>
-                        <p className="text-xs text-slate-500">1 opportunity</p>
-                    </div>
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-1">
-                            <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                            <span className="text-sm font-semibold text-amber-800">Proposal</span>
-                        </div>
-                        <p className="text-2xl font-bold text-amber-700">€12,000</p>
-                        <p className="text-xs text-slate-500">1 opportunity</p>
-                    </div>
-                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-1">
-                            <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                            <span className="text-sm font-semibold text-emerald-800">Negotiation</span>
-                        </div>
-                        <p className="text-2xl font-bold text-emerald-700">€24,000</p>
-                        <p className="text-xs text-slate-500">1 opportunity</p>
-                    </div>
-                </div>
-                
-                <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-                    <p className="text-sm text-purple-800">
-                        <strong>🎯 Pipeline Insight:</strong> All 3 opportunities originated from Support tickets flagged as expansion signals. Click on <strong>OPP-2847</strong> to see the complete journey from case to opportunity.
-                    </p>
-                </div>
             </div>
         );
 
-        // Opportunity Detail Component
-        const OpportunityDetail = ({ onBack }) => (
-            <div className="p-6 animate-fade-in">
-                <div className="flex items-center gap-3 mb-6">
-                    <button onClick={onBack} className="flex items-center gap-1 text-slate-600 hover:text-slate-800 font-medium">
-                        ← Back to Opportunities
-                    </button>
-                    <span className="text-slate-300">|</span>
-                    <span className="text-slate-500 text-sm">Opportunity OPP-2847</span>
-                    <span className="badge bg-emerald-100 text-emerald-700">Qualification</span>
-                </div>
-                
-                <div className="grid grid-cols-3 gap-6">
-                    <div className="col-span-2 space-y-4">
-                        <div className="bg-white rounded-lg shadow-sm border">
-                            <div className="px-4 py-3 border-b flex items-center justify-between">
-                                <h2 className="text-xl font-bold text-slate-800">Hospital Universitario Madrid - Premium Suite</h2>
-                                <span className="badge bg-emerald-100 text-emerald-800">Qualification Stage</span>
-                            </div>
-                            <div className="p-4">
-                                <div className="grid grid-cols-3 gap-4 mb-6">
-                                    <div className="text-center p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-                                        <p className="text-3xl font-bold text-emerald-600">€48,000</p>
-                                        <p className="text-sm text-slate-500">Annual Value</p>
-                                    </div>
-                                    <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                        <p className="text-3xl font-bold sf-blue-text">127</p>
-                                        <p className="text-sm text-slate-500">Practitioners</p>
-                                    </div>
-                                    <div className="text-center p-4 bg-amber-50 rounded-lg border border-amber-200">
-                                        <p className="text-3xl font-bold text-amber-600">75%</p>
-                                        <p className="text-sm text-slate-500">Win Probability</p>
-                                    </div>
-                                </div>
-                                
-                                <hr className="my-4" />
-                                
-                                <div className="space-y-3">
-                                    <h3 className="font-semibold text-slate-700">📅 Opportunity Timeline</h3>
-                                    <div className="space-y-3 ml-2">
-                                        {[
-                                            { color: 'bg-purple-500', text: 'Support Case CS-12848 received', time: 'Today, 10:10 AM' },
-                                            { color: 'bg-emerald-500', text: 'AI classified as Expansion Opportunity (94% confidence)', time: 'Today, 10:10 AM - Automated' },
-                                            { color: 'bg-blue-500', text: 'Lead LD-5520 created and assigned to María González', time: 'Today, 10:15 AM - Auto-routing' },
-                                            { color: 'bg-indigo-500', text: 'Lead qualified and converted to Opportunity', time: 'Today, 11:30 AM - María González' },
-                                            { color: 'bg-amber-500', text: 'Discovery call scheduled', time: 'Tomorrow, 3:00 PM - Pending' },
-                                        ].map((item, i) => (
-                                            <div key={i} className="flex items-start gap-3">
-                                                <div className={`w-3 h-3 rounded-full ${item.color} mt-1.5`}></div>
-                                                <div>
-                                                    <p className="text-sm font-medium text-slate-700">{item.text}</p>
-                                                    <p className="text-xs text-slate-500">{item.time}</p>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div className="bg-blue-50 rounded-lg shadow-sm border border-blue-200">
-                            <div className="px-4 py-3 border-b border-blue-200">
-                                <h3 className="text-sm font-semibold text-blue-800 flex items-center gap-2">
-                                    <span>📋</span> Original Support Case Context
-                                </h3>
-                            </div>
-                            <div className="p-4">
-                                <p className="text-sm text-slate-700 mb-2">
-                                    <strong>Case CS-12848:</strong> Customer inquired about telemedicine features for 127 practitioners
-                                </p>
-                                <p className="text-sm text-slate-600">
-                                    AI Classification: Expansion Opportunity (94% confidence) | Intent: Enterprise Video Solution
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    {/* Sidebar */}
-                    <div className="space-y-4">
-                        <div className="bg-white rounded-lg shadow-sm border">
-                            <div className="px-4 py-3 border-b bg-slate-50">
-                                <h3 className="text-sm font-semibold text-slate-700">Opportunity Details</h3>
-                            </div>
-                            <div className="p-4 space-y-3 text-sm">
-                                <div className="flex justify-between">
-                                    <span className="text-slate-500">Owner</span>
-                                    <span className="font-medium">María González</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-slate-500">Stage</span>
-                                    <span>Qualification</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-slate-500">Close Date</span>
-                                    <span>March 15, 2026</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-slate-500">Product</span>
-                                    <span>Premium Suite Enterprise</span>
-                                </div>
-                                <hr />
-                                <div className="flex justify-between">
-                                    <span className="text-slate-500">Lead Source</span>
-                                    <span className="badge bg-purple-100 text-purple-800 text-xs">Support Signal</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-slate-500">Original Lead</span>
-                                    <span className="sf-blue-text font-medium">LD-5520</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-slate-500">Original Case</span>
-                                    <span className="sf-blue-text font-medium">CS-12848</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div className="bg-white rounded-lg shadow-sm border">
-                            <div className="px-4 py-3 border-b bg-slate-50">
-                                <h3 className="text-sm font-semibold text-slate-700">✅ Next Steps</h3>
-                            </div>
-                            <div className="p-4 space-y-2">
-                                {[
-                                    { text: 'Discovery call scheduled', done: false, highlight: true },
-                                    { text: 'Prepare custom demo', done: false, highlight: false },
-                                    { text: 'Send pricing proposal', done: false, highlight: false }
-                                ].map((step, i) => (
-                                    <div key={i} className={`flex items-center gap-2 p-2 ${step.highlight ? 'bg-amber-50 border border-amber-200' : 'bg-slate-50'} rounded`}>
-                                        <input type="checkbox" className="rounded" checked={step.done} readOnly />
-                                        <span className="text-sm">{step.text}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        
-                        <div className="bg-emerald-50 rounded-lg shadow-sm border border-emerald-200 p-4">
-                            <div className="flex items-center gap-2 mb-2">
-                                <span className="text-emerald-600">🎯</span>
-                                <span className="font-semibold text-emerald-800">Pipeline Impact</span>
-                            </div>
-                            <p className="text-sm text-emerald-700">
-                                This opportunity was generated automatically from a support ticket, demonstrating the value of the AI-powered expansion pipeline.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-
-        // Help Dialog
-        const HelpDialog = ({ isOpen, onClose }) => {
-            if (!isOpen) return null;
-            return (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
-                    <div className="bg-white rounded-lg shadow-xl w-[500px] max-w-full m-4" onClick={e => e.stopPropagation()}>
-                        <div className="px-4 py-3 border-b flex items-center justify-between">
-                            <h3 className="font-semibold text-lg">🗺️ Navigation Guide</h3>
-                            <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl">✕</button>
-                        </div>
-                        <div className="p-4 space-y-4 text-sm">
-                            <div className="p-3 bg-slate-50 rounded-lg">
-                                <p className="font-semibold mb-1">📋 Cases (Main Queue)</p>
-                                <p className="text-slate-600">View all support tickets with AI classification and recommended next steps.</p>
-                            </div>
-                            <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                                <p className="font-semibold mb-1 text-emerald-800">🏪 CS-12847 - Small Clinic Flow</p>
-                                <p className="text-slate-600">See automated soft-sell response for smaller accounts.</p>
-                            </div>
-                            <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
-                                <p className="font-semibold mb-1 text-purple-800">🏢 CS-12848 - Enterprise Flow</p>
-                                <p className="text-slate-600">See Sales handoff flow → Lead creation → Opportunity conversion.</p>
-                            </div>
-                            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                                <p className="font-semibold mb-1 text-blue-800">📈 Leads</p>
-                                <p className="text-slate-600">View all leads generated from support signals. Only LD-5520 is converted.</p>
-                            </div>
-                            <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
-                                <p className="font-semibold mb-1 text-amber-800">💰 Opportunities</p>
-                                <p className="text-slate-600">View pipeline with all opportunities from support signals.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // Main App
+        // ==================== MAIN APP ====================
         const App = () => {
+            // App state
+            const [stage, setStage] = useState('chat'); // chat, processing, json, salesforce
+            const [processingStage, setProcessingStage] = useState('receiving');
+            const [currentScenario, setCurrentScenario] = useState(null);
+            const [userMessage, setUserMessage] = useState('');
+            
+            // Salesforce state
             const [currentView, setCurrentView] = useState('cases');
-            const [helpOpen, setHelpOpen] = useState(false);
-            
-            const handleSelectCase = (size) => {
-                setCurrentView(size === 'small' ? 'case-small' : 'case-enterprise');
+            const [cases, setCases] = useState(initialCases);
+            const [leads, setLeads] = useState(initialLeads);
+            const [opportunities, setOpportunities] = useState(initialOpportunities);
+            const [selectedCase, setSelectedCase] = useState(null);
+            const [selectedLead, setSelectedLead] = useState(null);
+            const [newCaseId, setNewCaseId] = useState(null);
+            const [newLeadId, setNewLeadId] = useState(null);
+            const [createdCaseIds, setCreatedCaseIds] = useState([]);
+            const [createdLeadIds, setCreatedLeadIds] = useState([]);
+
+            // Handle chat submission
+            const handleChatSubmit = (message) => {
+                setUserMessage(message);
+                const scenario = detectScenario(message);
+                setCurrentScenario(scenario);
+                setStage('processing');
+
+                // Simulate AI processing stages
+                const stages = ['receiving', 'analyzing', 'classifying', 'evaluating', 'generating', 'routing', 'complete'];
+                let stageIndex = 0;
+
+                const interval = setInterval(() => {
+                    stageIndex++;
+                    if (stageIndex < stages.length) {
+                        setProcessingStage(stages[stageIndex]);
+                    } else {
+                        clearInterval(interval);
+                        setTimeout(() => setStage('json'), 500);
+                    }
+                }, 600);
             };
-            
+
+            // Handle continue to Salesforce
+            const handleContinueToSalesforce = () => {
+                const scenarioData = scenarios[currentScenario];
+                
+                // Create new case
+                const newCase = {
+                    id: scenarioData.caseId,
+                    subject: currentScenario === 'small_clinic' 
+                        ? "Can't find video call button" 
+                        : currentScenario === 'enterprise'
+                        ? 'Telemedicine for 127 practitioners'
+                        : 'How to export patient list?',
+                    clinic: scenarioData.clinicName,
+                    type: scenarioData.classification.intent,
+                    size: scenarioData.practitioners >= 20 ? 'enterprise' : 'small',
+                    status: 'New',
+                    created: 'Just now',
+                    priority: 'High',
+                    nextStep: scenarioData.nextStep
+                };
+
+                setCases(prev => [newCase, ...prev]);
+                setNewCaseId(scenarioData.caseId);
+                setCreatedCaseIds(prev => [...prev, scenarioData.caseId]);
+
+                // Create lead if expansion
+                if (scenarioData.classification.intent === 'expansion') {
+                    const newLeadIdValue = `LD-${5521 + leads.length}`;
+                    const newLead = {
+                        id: newLeadIdValue,
+                        clinic: scenarioData.clinicName,
+                        contact: scenarioData.customerName,
+                        email: scenarioData.customerName.toLowerCase().replace('dr. ', '').replace(' ', '.') + '@clinic.es',
+                        value: scenarioData.leadValue,
+                        status: 'New',
+                        source: 'Support Expansion Signal',
+                        assigned: currentScenario === 'enterprise' ? 'María González' : 'Auto-assigned',
+                        created: 'Just now',
+                        converted: false
+                    };
+                    setLeads(prev => [newLead, ...prev]);
+                    setNewLeadId(newLeadIdValue);
+                    setCreatedLeadIds(prev => [...prev, newLeadIdValue]);
+                }
+
+                setStage('salesforce');
+                setCurrentView('cases');
+            };
+
+            // Handle lead conversion
+            const handleConvertLead = (lead) => {
+                const newOpp = {
+                    id: `OPP-${2848 + opportunities.length}`,
+                    clinic: lead.clinic,
+                    contact: lead.contact,
+                    value: lead.value,
+                    stage: 'Qualification',
+                    probability: '50%',
+                    closeDate: 'Mar 30, 2026',
+                    source: 'Support Signal',
+                    owner: lead.assigned,
+                    leadId: lead.id
+                };
+                setOpportunities(prev => [newOpp, ...prev]);
+                setLeads(prev => prev.map(l => l.id === lead.id ? {...l, status: 'Converted', converted: true} : l));
+                setCurrentView('opportunities');
+            };
+
+            // Reset demo
+            const handleReset = () => {
+                setStage('chat');
+                setProcessingStage('receiving');
+                setCurrentScenario(null);
+                setUserMessage('');
+                setCases(initialCases);
+                setLeads(initialLeads);
+                setOpportunities(initialOpportunities);
+                setSelectedCase(null);
+                setSelectedLead(null);
+                setNewCaseId(null);
+                setNewLeadId(null);
+                setCreatedCaseIds([]);
+                setCreatedLeadIds([]);
+                setCurrentView('cases');
+            };
+
             return (
-                <div className="min-h-screen bg-slate-100">
-                    <SalesforceHeader currentView={currentView} setCurrentView={setCurrentView} />
-                    
-                    <main>
-                        {currentView === 'cases' && <CasesList onSelectCase={handleSelectCase} />}
-                        {currentView === 'case-small' && (
-                            <CaseDetail 
-                                size="small" 
-                                onBack={() => setCurrentView('cases')} 
-                                onViewLead={() => setCurrentView('leads')} 
+                <div className="min-h-screen bg-gray-100">
+                    {/* Demo Header */}
+                    <div className="bg-slate-900 text-white px-6 py-3">
+                        <div className="max-w-7xl mx-auto flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-xl font-bold">🚀 Expansion Pipeline</span>
+                                <span className="text-slate-400">|</span>
+                                <span className="text-slate-300 text-sm">Interactive Demo</span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2 text-sm">
+                                    <span className={`w-2 h-2 rounded-full ${stage === 'chat' ? 'bg-emerald-400' : 'bg-slate-600'}`}></span>
+                                    <span className={stage === 'chat' ? 'text-white' : 'text-slate-500'}>Chat</span>
+                                    <span className="text-slate-600">→</span>
+                                    <span className={`w-2 h-2 rounded-full ${stage === 'processing' ? 'bg-emerald-400 animate-pulse' : stage === 'json' || stage === 'salesforce' ? 'bg-emerald-400' : 'bg-slate-600'}`}></span>
+                                    <span className={stage === 'processing' ? 'text-white' : 'text-slate-500'}>AI</span>
+                                    <span className="text-slate-600">→</span>
+                                    <span className={`w-2 h-2 rounded-full ${stage === 'json' ? 'bg-emerald-400' : stage === 'salesforce' ? 'bg-emerald-400' : 'bg-slate-600'}`}></span>
+                                    <span className={stage === 'json' ? 'text-white' : 'text-slate-500'}>JSON</span>
+                                    <span className="text-slate-600">→</span>
+                                    <span className={`w-2 h-2 rounded-full ${stage === 'salesforce' ? 'bg-emerald-400' : 'bg-slate-600'}`}></span>
+                                    <span className={stage === 'salesforce' ? 'text-white' : 'text-slate-500'}>Salesforce</span>
+                                </div>
+                                {stage !== 'chat' && (
+                                    <button
+                                        onClick={handleReset}
+                                        className="px-4 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-colors"
+                                    >
+                                        Reset Demo
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Main Content */}
+                    {stage === 'chat' && (
+                        <div className="max-w-7xl mx-auto py-12 px-6">
+                            <div className="text-center mb-8">
+                                <h1 className="text-3xl font-bold text-gray-800 mb-2">Start a Support Conversation</h1>
+                                <p className="text-gray-600">Type a message or select an example to see the Expansion Pipeline in action</p>
+                            </div>
+                            <ChatInterface onSubmit={handleChatSubmit} isProcessing={false} />
+                        </div>
+                    )}
+
+                    {stage === 'processing' && (
+                        <div className="max-w-7xl mx-auto py-12 px-6">
+                            <div className="text-center mb-8">
+                                <h1 className="text-3xl font-bold text-gray-800 mb-2">AI Classification in Progress</h1>
+                                <p className="text-gray-600">Analyzing message and determining intent...</p>
+                            </div>
+                            <AIProcessing stage={processingStage} scenario={currentScenario} />
+                        </div>
+                    )}
+
+                    {stage === 'json' && currentScenario && (
+                        <div className="max-w-7xl mx-auto py-12 px-6">
+                            <div className="text-center mb-8">
+                                <h1 className="text-3xl font-bold text-gray-800 mb-2">Classification Complete</h1>
+                                <p className="text-gray-600">AI has classified the ticket and determined the next action</p>
+                            </div>
+                            <JSONOutput 
+                                classification={scenarios[currentScenario].classification} 
+                                onContinue={handleContinueToSalesforce}
                             />
-                        )}
-                        {currentView === 'case-enterprise' && (
-                            <CaseDetail 
-                                size="enterprise" 
-                                onBack={() => setCurrentView('cases')} 
-                                onViewLead={() => setCurrentView('lead-detail')} 
+                        </div>
+                    )}
+
+                    {stage === 'salesforce' && (
+                        <div className="min-h-screen">
+                            <SalesforceHeader 
+                                currentView={currentView} 
+                                setCurrentView={setCurrentView}
+                                newCaseId={newCaseId}
                             />
-                        )}
-                        {currentView === 'leads' && (
-                            <LeadsList 
-                                onSelectLead={() => setCurrentView('lead-detail')} 
-                                onViewOpportunity={() => setCurrentView('opportunity-detail')} 
-                            />
-                        )}
-                        {currentView === 'lead-detail' && (
-                            <LeadDetail 
-                                onBack={() => setCurrentView('leads')} 
-                                onViewOpportunity={() => setCurrentView('opportunity-detail')} 
-                            />
-                        )}
-                        {currentView === 'opportunities' && (
-                            <OpportunitiesList 
-                                onSelectOpportunity={() => setCurrentView('opportunity-detail')} 
-                            />
-                        )}
-                        {currentView === 'opportunity-detail' && (
-                            <OpportunityDetail onBack={() => setCurrentView('opportunities')} />
-                        )}
-                    </main>
-                    
-                    {/* Help Button */}
-                    <button 
-                        onClick={() => setHelpOpen(true)}
-                        className="fixed bottom-6 right-6 w-14 h-14 sf-blue text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center text-xl font-bold"
-                    >
-                        ?
-                    </button>
-                    
-                    <HelpDialog isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
+                            
+                            {currentView === 'cases' && !selectedCase && (
+                                <CasesListView 
+                                    cases={cases} 
+                                    onSelectCase={(c) => setSelectedCase(c)}
+                                    newCaseId={newCaseId}
+                                    createdCaseIds={createdCaseIds}
+                                />
+                            )}
+
+                            {currentView === 'cases' && selectedCase && (
+                                <CaseDetailView 
+                                    caseData={selectedCase}
+                                    scenario={currentScenario}
+                                    onBack={() => setSelectedCase(null)}
+                                    onViewLead={() => {
+                                        const lead = leads.find(l => l.clinic === scenarios[currentScenario]?.clinicName);
+                                        if (lead) {
+                                            setSelectedLead(lead);
+                                            setCurrentView('leads');
+                                        }
+                                    }}
+                                />
+                            )}
+
+                            {currentView === 'leads' && !selectedLead && (
+                                <LeadsListView 
+                                    leads={leads}
+                                    onSelectLead={(l) => setSelectedLead(l)}
+                                    newLeadId={newLeadId}
+                                    createdLeadIds={createdLeadIds}
+                                />
+                            )}
+
+                            {currentView === 'leads' && selectedLead && (
+                                <LeadDetailView 
+                                    lead={selectedLead}
+                                    scenario={selectedLead.clinic === scenarios[currentScenario]?.clinicName ? currentScenario : null}
+                                    onBack={() => setSelectedLead(null)}
+                                    onConvert={() => handleConvertLead(selectedLead)}
+                                />
+                            )}
+
+                            {currentView === 'opportunities' && (
+                                <OpportunitiesListView opportunities={opportunities} />
+                            )}
+                        </div>
+                    )}
                 </div>
             );
         };

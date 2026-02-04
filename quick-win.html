@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Win: Help Center CTA | Expansion Pipeline</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dp-teal': '#00b39b',
+                        'dp-teal-light': '#e5faf8',
+                        'dp-teal-dark': '#009681',
+                        'doctoralia': '#00c8b3',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-text {
+            background: linear-gradient(135deg, #00b39b 0%, #3d83df 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .before-after-slider {
+            position: relative;
+            overflow: hidden;
+        }
+        .highlight-box {
+            animation: pulse-border 2s infinite;
+        }
+        @keyframes pulse-border {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 200, 179, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(0, 200, 179, 0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <a href="./index.html" class="text-gray-500 hover:text-dp-teal transition-colors">
+                        ← Back to Presentation
+                    </a>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="bg-amber-100 text-amber-800 text-xs font-medium px-3 py-1 rounded-full">Quick Win</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-6 py-12">
+        
+        <!-- Title Section -->
+        <div class="text-center mb-12">
+            <p class="text-dp-teal font-semibold tracking-wider uppercase mb-3">Quick Win Suggestion</p>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Help Center <span class="gradient-text">Call-to-Action</span></h1>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                A simple improvement to convert Help Center visitors into leads — zero engineering effort required.
+            </p>
+        </div>
+
+        <!-- The Problem -->
+        <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-200 mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="text-2xl">🔍</span>
+                <h2 class="text-xl font-bold">The Observation</h2>
+            </div>
+            <p class="text-gray-600 mb-4">
+                When users search for premium features like <strong>"First Class"</strong> in the Help Center, they receive a detailed explanation of the benefits — but <strong>no clear next step</strong> to take action.
+            </p>
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <p class="text-amber-800 text-sm">
+                    <strong>💡 Insight:</strong> These users are already interested in premium features. They're reading about benefits. 
+                    This is a high-intent moment — we should make it easy to convert.
+                </p>
+            </div>
+        </div>
+
+        <!-- Before / After -->
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+            
+            <!-- BEFORE -->
+            <div>
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="bg-red-100 text-red-700 text-sm font-semibold px-3 py-1 rounded-full">BEFORE</span>
+                    <span class="text-gray-500 text-sm">Current State</span>
+                </div>
+                <div class="bg-white rounded-xl border-2 border-red-200 overflow-hidden shadow-lg">
+                    <!-- Fake Help Center Header -->
+                    <div class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-6 h-6 text-doctoralia" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 18.5L4 16V8.5l8 4v8zm0-9.5L4.5 7 12 3.5 19.5 7 12 11zm8 5l-8 4v-8l8-4v8z"/>
+                            </svg>
+                            <span class="font-semibold text-gray-800">Ayuda</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-500">
+                            <span>🇪🇸 ES</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 mb-4">
+                            <svg class="w-5 h-5 text-doctoralia" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2L2 7v10l10 5 10-5V7L12 2z"/>
+                            </svg>
+                            <span class="text-sm text-gray-500">First Class</span>
+                        </div>
+                        
+                        <p class="text-gray-700 mb-4 text-sm leading-relaxed">
+                            <strong>First Class</strong> es un servicio de visibilidad premium de Doctoralia diseñado para que su perfil destaque en los resultados de búsqueda de su especialidad y ciudad.
+                        </p>
+                        
+                        <p class="text-gray-700 mb-3 text-sm font-medium">¿Qué beneficios ofrece?</p>
+                        
+                        <ul class="space-y-2 text-sm text-gray-600 mb-4">
+                            <li class="flex items-start gap-2">
+                                <span class="text-doctoralia mt-1">•</span>
+                                <span><strong>Posiciones preferentes:</strong> Su perfil aparecerá rotando en los <strong>3 primeros puestos</strong> de los listados de búsqueda.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-doctoralia mt-1">•</span>
+                                <span><strong>Diferenciación visual:</strong> El perfil se resalta con un <strong>borde dorado</strong>, lo que aumenta la confianza y atrae la atención.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-doctoralia mt-1">•</span>
+                                <span><strong>Mayor tráfico:</strong> Los especialistas con First Class reciben, de media, un <strong>200% más de visitas</strong> en su perfil.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-doctoralia mt-1">•</span>
+                                <span><strong>Presencia extendida:</strong> Aparecerá como recomendado en perfiles de otros especialistas.</span>
+                            </li>
+                        </ul>
+                        
+                        <!-- Screenshot placeholder -->
+                        <div class="bg-gray-100 rounded-lg p-4 mb-4">
+                            <div class="bg-white rounded border border-gray-200 p-3">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <div class="w-8 h-8 bg-gray-200 rounded"></div>
+                                    <div>
+                                        <div class="flex items-center gap-1">
+                                            <span class="bg-doctoralia text-white text-xs px-1 rounded">DESTACADO</span>
+                                            <span class="text-sm font-medium">Dr. Example</span>
+                                        </div>
+                                        <div class="text-xs text-gray-500">★★★★★ 315 opiniones</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <p class="text-gray-700 mb-2 text-sm font-medium">Requisitos para activarlo</p>
+                        <p class="text-sm text-gray-600 mb-2">Para garantizar la calidad de los resultados, solo los perfiles que cumplen estos criterios pueden acceder:</p>
+                        <ol class="text-sm text-gray-600 list-decimal list-inside">
+                            <li>Tener una suscripción activa (Plan Premium, Plus o VIP).</li>
+                        </ol>
+                        
+                        <!-- END OF CONTENT - NO CTA -->
+                        <div class="mt-6 pt-4 border-t border-gray-200">
+                            <p class="text-xs text-gray-400 text-center">— End of article —</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 bg-red-50 rounded-lg p-4 border border-red-200">
+                    <p class="text-red-700 text-sm">
+                        <strong>❌ Problem:</strong> User reads about benefits but has no clear action to take. They leave the page without converting.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- AFTER -->
+            <div>
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="bg-emerald-100 text-emerald-700 text-sm font-semibold px-3 py-1 rounded-full">AFTER</span>
+                    <span class="text-gray-500 text-sm">Proposed Improvement</span>
+                </div>
+                <div class="bg-white rounded-xl border-2 border-emerald-200 overflow-hidden shadow-lg">
+                    <!-- Fake Help Center Header -->
+                    <div class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-6 h-6 text-doctoralia" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 18.5L4 16V8.5l8 4v8zm0-9.5L4.5 7 12 3.5 19.5 7 12 11zm8 5l-8 4v-8l8-4v8z"/>
+                            </svg>
+                            <span class="font-semibold text-gray-800">Ayuda</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-500">
+                            <span>🇪🇸 ES</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 mb-4">
+                            <svg class="w-5 h-5 text-doctoralia" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2L2 7v10l10 5 10-5V7L12 2z"/>
+                            </svg>
+                            <span class="text-sm text-gray-500">First Class</span>
+                        </div>
+                        
+                        <p class="text-gray-700 mb-4 text-sm leading-relaxed">
+                            <strong>First Class</strong> es un servicio de visibilidad premium de Doctoralia diseñado para que su perfil destaque en los resultados de búsqueda de su especialidad y ciudad.
+                        </p>
+                        
+                        <p class="text-gray-700 mb-3 text-sm font-medium">¿Qué beneficios ofrece?</p>
+                        
+                        <ul class="space-y-2 text-sm text-gray-600 mb-4">
+                            <li class="flex items-start gap-2">
+                                <span class="text-doctoralia mt-1">•</span>
+                                <span><strong>Posiciones preferentes:</strong> Su perfil aparecerá rotando en los <strong>3 primeros puestos</strong> de los listados de búsqueda.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-doctoralia mt-1">•</span>
+                                <span><strong>Diferenciación visual:</strong> El perfil se resalta con un <strong>borde dorado</strong>, lo que aumenta la confianza y atrae la atención.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-doctoralia mt-1">•</span>
+                                <span><strong>Mayor tráfico:</strong> Los especialistas con First Class reciben, de media, un <strong>200% más de visitas</strong> en su perfil.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-doctoralia mt-1">•</span>
+                                <span><strong>Presencia extendida:</strong> Aparecerá como recomendado en perfiles de otros especialistas.</span>
+                            </li>
+                        </ul>
+                        
+                        <!-- Screenshot placeholder -->
+                        <div class="bg-gray-100 rounded-lg p-4 mb-4">
+                            <div class="bg-white rounded border border-gray-200 p-3">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <div class="w-8 h-8 bg-gray-200 rounded"></div>
+                                    <div>
+                                        <div class="flex items-center gap-1">
+                                            <span class="bg-doctoralia text-white text-xs px-1 rounded">DESTACADO</span>
+                                            <span class="text-sm font-medium">Dr. Example</span>
+                                        </div>
+                                        <div class="text-xs text-gray-500">★★★★★ 315 opiniones</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <p class="text-gray-700 mb-2 text-sm font-medium">Requisitos para activarlo</p>
+                        <p class="text-sm text-gray-600 mb-2">Para garantizar la calidad de los resultados, solo los perfiles que cumplen estos criterios pueden acceder:</p>
+                        <ol class="text-sm text-gray-600 list-decimal list-inside mb-6">
+                            <li>Tener una suscripción activa (Plan Premium, Plus o VIP).</li>
+                        </ol>
+                        
+                        <!-- NEW CTA SECTION -->
+                        <div class="highlight-box bg-gradient-to-r from-doctoralia/10 to-emerald-50 rounded-xl p-5 border-2 border-doctoralia">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="text-xl">🚀</span>
+                                <p class="font-semibold text-gray-800">¿Listo para destacar?</p>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-4">
+                                Active First Class hoy y empiece a recibir hasta un 200% más de visitas en su perfil.
+                            </p>
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <button class="bg-doctoralia hover:bg-doctoralia/90 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors text-sm">
+                                    Activar First Class
+                                </button>
+                                <button class="bg-white hover:bg-gray-50 text-gray-700 font-medium px-5 py-2.5 rounded-lg border border-gray-300 transition-colors text-sm">
+                                    Hablar con Ventas
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+                    <p class="text-emerald-700 text-sm">
+                        <strong>✅ Solution:</strong> Clear CTA converts interest into action. User can self-serve or connect with Sales directly.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Impact & Implementation -->
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+            
+            <!-- Expected Impact -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-200">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="text-2xl">📈</span>
+                    <h2 class="text-xl font-bold">Expected Impact</h2>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span class="text-gray-600">Help Center → Lead conversion</span>
+                        <span class="font-semibold text-dp-teal">+15-25%</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span class="text-gray-600">Self-service upgrades</span>
+                        <span class="font-semibold text-dp-teal">+10-20%</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span class="text-gray-600">Sales team efficiency</span>
+                        <span class="font-semibold text-dp-teal">Higher intent leads</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Implementation -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-200">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="text-2xl">⚙️</span>
+                    <h2 class="text-xl font-bold">Implementation</h2>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start gap-3">
+                        <span class="w-6 h-6 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0">1</span>
+                        <div>
+                            <p class="font-medium">Add CTA component to Help Center</p>
+                            <p class="text-sm text-gray-500">Simple HTML/CSS addition</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="w-6 h-6 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0">2</span>
+                        <div>
+                            <p class="font-medium">Link buttons to upgrade flow</p>
+                            <p class="text-sm text-gray-500">Connect to existing checkout/sales form</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="w-6 h-6 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0">3</span>
+                        <div>
+                            <p class="font-medium">Track conversions</p>
+                            <p class="text-sm text-gray-500">Add UTM parameters for attribution</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 pt-4 border-t border-gray-200">
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-gray-500">Effort:</span>
+                        <span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-medium">Low</span>
+                        <span class="text-gray-300">|</span>
+                        <span class="text-gray-500">Impact:</span>
+                        <span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-medium">High</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Broader Application -->
+        <div class="bg-gradient-to-r from-dp-teal to-dp-teal-dark rounded-2xl p-8 text-white mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="text-2xl">💡</span>
+                <h2 class="text-xl font-bold">Broader Application</h2>
+            </div>
+            <p class="text-white/90 mb-4">
+                This same pattern can be applied to <strong>every premium feature article</strong> in the Help Center:
+            </p>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="bg-white/10 rounded-lg p-4">
+                    <p class="font-medium">Telemedicine</p>
+                    <p class="text-sm text-white/70">Video calls article → CTA to upgrade</p>
+                </div>
+                <div class="bg-white/10 rounded-lg p-4">
+                    <p class="font-medium">Analytics</p>
+                    <p class="text-sm text-white/70">Reports article → CTA to upgrade</p>
+                </div>
+                <div class="bg-white/10 rounded-lg p-4">
+                    <p class="font-medium">Integrations</p>
+                    <p class="text-sm text-white/70">API docs → CTA to contact sales</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back to Presentation -->
+        <div class="text-center">
+            <a href="./index.html" class="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-full font-semibold transition-colors">
+                ← Back to Presentation
+            </a>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-8 mt-12">
+        <div class="max-w-6xl mx-auto px-6 text-center">
+            <p class="text-gray-500 text-sm">Expansion Pipeline — Quick Win Suggestion</p>
+            <p class="text-gray-400 text-xs mt-1">Docplanner Business Case</p>
+        </div>
+    </footer>
+
+</body>
+</html>
