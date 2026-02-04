@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>AI Intent Classification – JSON Outcome</title>
+
+<style>
+:root {
+  --bg-dark: #0b1220;
+  --bg-panel: #111a2e;
+  --bg-panel-soft: #0f172a;
+  --accent: #38e8c6;
+  --text-main: #e5e7eb;
+  --text-muted: #9ca3af;
+  --border-soft: rgba(255,255,255,0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 40px;
+  font-family: Inter, Arial, sans-serif;
+  background: radial-gradient(circle at top, #101c3d 0%, var(--bg-dark) 55%);
+  color: var(--text-main);
+}
+
+h1, h2, h3 {
+  margin: 0;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 42px;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 18px;
+}
+
+.top-label {
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 40px;
+  margin-top: 50px;
+}
+
+/* LEFT SIDE */
+
+.explain-box {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0));
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  padding: 28px;
+}
+
+.step {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.step-number {
+  background: rgba(56,232,198,0.15);
+  color: var(--accent);
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.step h4 {
+  margin-bottom: 4px;
+}
+
+.step p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.benefits {
+  margin-top: 26px;
+  padding: 18px;
+  border-radius: 12px;
+  background: rgba(15,23,42,0.7);
+  border: 1px solid var(--border-soft);
+  font-size: 14px;
+}
+
+.benefits div {
+  margin-bottom: 8px;
+}
+
+/* RIGHT SIDE */
+
+.panel {
+  background: var(--bg-panel);
+  border-radius: 18px;
+  border: 1px solid var(--border-soft);
+  overflow: hidden;
+}
+
+.panel-header {
+  background: rgba(255,255,255,0.04);
+  padding: 14px 18px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.panel-body {
+  padding: 20px;
+}
+
+textarea {
+  width: 100%;
+  height: 120px;
+  background: var(--bg-panel-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  padding: 12px;
+  color: var(--text-main);
+  resize: none;
+  font-size: 14px;
+}
+
+button {
+  margin-top: 14px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #38e8c6, #22c7a3);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+pre {
+  margin-top: 18px;
+  background: #020617;
+  border-radius: 12px;
+  padding: 18px;
+  font-size: 13px;
+  color: #a7f3d0;
+
+  /* 🔒 Layout control */
+  height: 360px;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* Optional: better readability */
+  line-height: 1.45;
+}
+
+/* FOOTER BUTTON */
+
+.footer {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.footer button {
+  background: rgba(56,232,198,0.12);
+  color: var(--accent);
+  border: 1px solid rgba(56,232,198,0.4);
+}
+</style>
+</head>
+
+<body>
+
+<div class="top-label">THE BRAIN</div>
+<h1>AI Intent Classification</h1>
+<div class="subtitle">A decision layer, not just a reply engine</div>
+
+<div class="layout">
+
+  <!-- LEFT -->
+  <div class="explain-box">
+
+    <h3 style="margin-bottom:22px;">The AI analyzes:</h3>
+
+    <div class="step">
+      <div class="step-number">1</div>
+      <div>
+        <h4>Ticket Content</h4>
+        <p>Natural language understanding of the request</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">2</div>
+      <div>
+        <h4>Customer Context</h4>
+        <p>Account data, plan, engagement, history from Salesforce</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">3</div>
+      <div>
+        <h4>Behavioral Signals</h4>
+        <p>Feature attempts, usage velocity, team growth</p>
+      </div>
+    </div>
+
+    <div class="benefits">
+      <div>✔ Removes ambiguity</div>
+      <div>✔ Enables automation</div>
+      <div>✔ Makes decisions auditable</div>
+      <div>✔ Scalable across markets</div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT -->
+  <div class="panel">
+
+    <div class="panel-header">AI Classification Response</div>
+
+    <div class="panel-body">
+
+      <textarea id="message">
+I'm trying to do a video call with a patient but I can't find the button
+      </textarea>
+
+      <button onclick="classify()">Run classification</button>
+
+      <pre id="output">{}</pre>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div class="footer">
+  <button>View Full Technical Documentation</button>
+</div>
+
+<script>
+async function classify() {
+  const message = document.getElementById("message").value;
+  const output = document.getElementById("output");
+
+  output.textContent = "Running classification...";
+
+  try {
+    const response = await fetch("http://127.0.0.1:8000/classify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message })
+    });
+
+    const data = await response.json();
+    output.textContent = JSON.stringify(data, null, 2);
+
+  } catch {
+    output.textContent = "Error connecting to backend.";
+  }
+}
+</script>
+
+</body>
+</html>
+
