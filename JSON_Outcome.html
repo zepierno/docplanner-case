@@ -261,10 +261,14 @@ async function classify() {
 
   try {
     const response = await fetch("https://docplanner-case.onrender.com/classify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message })
-    });
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    message: userMessage
+  })
+});
 
     const data = await response.json();
     output.textContent = JSON.stringify(data, null, 2);
