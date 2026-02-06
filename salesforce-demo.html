@@ -255,6 +255,88 @@ Docplanner Support Team`,
             return 'small_clinic';
         };
 
+        // Extract number of practitioners/doctors from message
+        const extractPractitioners = (message) => {
+            // Look for patterns like "53 doctors", "127 practitioners", "10 médicos", etc.
+            const patterns = [
+                /(\d+)\s*(?:doctors?|practitioners?|médicos?|medicos?|physicians?|specialists?|profesionales?)/i,
+                /(?:have|tenemos|somos|with)\s*(\d+)\s*(?:doctors?|practitioners?|médicos?|medicos?)/i,
+                /(?:for|para)\s*(?:all\s*)?(?:my|our|mis|nuestros)?\s*(\d+)/i,
+                /(\d+)\s*(?:of us|de nosotros)/i
+            ];
+            
+            for (const pattern of patterns) {
+                const match = message.match(pattern);
+                if (match && match[1]) {
+                    const num = parseInt(match[1]);
+                    if (num > 0 && num < 10000) { // Sanity check
+                        return num;
+                    }
+                }
+            }
+            return null;
+        };
+
+        // Generate dynamic auto-reply based on classification and practitioners
+        const generateAutoReply = (scenario, practitioners, isEnterprise) => {
+            if (scenario === 'training') {
+                return `Dear Valued Customer,
+
+Thank you for your question! Exporting your patient list is easy:
+
+1. Go to "Patients" in the main menu
+2. Click the "Export" button (top right)
+3. Select the format (Excel, CSV, or PDF)
+4. Choose which fields to include
+5. Click "Download"
+
+Here's a quick video tutorial that walks you through the process:
+📹 https://help.docplanner.com/export-patients
+
+If you need any further assistance, feel free to reach out!
+
+Best regards,
+Docplanner Support Team`;
+            }
+            
+            if (isEnterprise || practitioners >= 20) {
+                return `Dear Valued Customer,
+
+Thank you for contacting us. Implementing telemedicine across your organization is an exciting initiative, and I'm glad you're considering Docplanner for this.
+
+Given the scale of your needs — ${practitioners || 'multiple'} practitioners across your organization — this is exactly the kind of project our Enterprise Solutions team specializes in.
+
+I've connected you with María González, our Enterprise Account Executive, who will reach out within the next 2 hours to discuss:
+• Custom telemedicine implementation for your workflow
+• Integration options with your existing systems
+• Volume-based pricing designed for institutions your size
+• Dedicated onboarding and ongoing support
+
+María has extensive experience with healthcare institutions and will be your dedicated point of contact throughout this process. In the meantime, I'm happy to answer any immediate questions you might have.
+
+Best regards,
+Docplanner Support Team`;
+            }
+            
+            // Small clinic soft-sell
+            return `Dear Valued Customer,
+
+Thank you for reaching out! I completely understand — video consultations have become essential for many clinics, especially when patients prefer the convenience of remote appointments.
+
+I wanted to clarify that video consultation is a feature included in our Premium Suite, which is why you're not seeing the button in your current dashboard. This isn't a bug — it's simply a capability we haven't unlocked for your plan yet.
+
+The Premium Suite includes everything you need for telemedicine:
+✓ HD Video Calls directly in the patient profile
+✓ Screen sharing for test results and images
+✓ Automatic appointment reminders for video sessions
+✓ Recording capabilities (with patient consent)
+
+Would you like me to send you more details about the Premium Suite? You can also start a 14-day free trial directly from your dashboard to see if it fits your clinic's needs — no commitment required.
+
+Best regards,
+Docplanner Support Team`;
+        };
+
         // ==================== CHAT COMPONENT ====================
         const ChatInterface = ({ onSubmit, isProcessing }) => {
             const [message, setMessage] = useState('');
@@ -622,9 +704,13 @@ Docplanner Support Team`,
             </div>
         );
 
-        const CaseDetailView = ({ caseData, scenario, onBack, onViewLead }) => {
+        const CaseDetailView = ({ caseData, scenario, onBack, onViewLead, userMessage, extractedPractitioners, liveClassification }) => {
             const config = getTypeConfig(caseData.type);
             const scenarioData = scenarios[scenario];
+            const classification = liveClassification || scenarioData.classification;
+            
+            // Use extracted practitioners or fallback to scenario default
+            const displayPractitioners = extractedPractitioners || scenarioData.practitioners;
             
             return (
                 <div className="p-6 animate-fade-in">
@@ -642,7 +728,7 @@ Docplanner Support Team`,
                                         <span className="text-2xl">{config.icon}</span>
                                         <div>
                                             <span className={`font-semibold ${config.textColor}`}>{config.label}</span>
-                                            <span className="text-gray-500 text-sm ml-2">• {(scenarioData.classification.confidence * 100).toFixed(0)}% confidence</span>
+                                            <span className="text-gray-500 text-sm ml-2">• {(classification.confidence * 100).toFixed(0)}% confidence</span>
                                         </div>
                                     </div>
                                     {caseData.type === 'expansion' && (
@@ -679,9 +765,13 @@ Docplanner Support Team`,
                                 <div className="border-t pt-4">
                                     <p className="text-sm text-gray-500 mb-2">Customer Message:</p>
                                     <div className="bg-gray-50 rounded-lg p-4 text-gray-700">
-                                        {scenario === 'small_clinic' && "Hello, I'm trying to do a video call with a patient but I can't find the button anywhere. Can you help me?"}
-                                        {scenario === 'enterprise' && "We need telemedicine capabilities for our hospital. We have 127 practitioners across multiple departments and need integration with our systems."}
-                                        {scenario === 'training' && "How do I export my patient list to Excel? I need to send it to my accountant."}
+                                        {userMessage || (
+                                            <>
+                                                {scenario === 'small_clinic' && "Hello, I'm trying to do a video call with a patient but I can't find the button anywhere. Can you help me?"}
+                                                {scenario === 'enterprise' && "We need telemedicine capabilities for our hospital. We have 127 practitioners across multiple departments and need integration with our systems."}
+                                                {scenario === 'training' && "How do I export my patient list to Excel? I need to send it to my accountant."}
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -695,7 +785,7 @@ Docplanner Support Team`,
                                     <span className="badge bg-emerald-100 text-emerald-700">✓ Sent</span>
                                 </div>
                                 <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 whitespace-pre-line max-h-64 overflow-y-auto">
-                                    {scenarioData.autoReply}
+                                    {generateAutoReply(scenario, displayPractitioners, caseData.size === 'enterprise')}
                                 </div>
                             </div>
                         </div>
@@ -720,7 +810,7 @@ Docplanner Support Team`,
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-500">Practitioners</p>
-                                        <p className="font-medium">{scenarioData.practitioners}</p>
+                                        <p className="font-medium">{displayPractitioners}</p>
                                     </div>
                                 </div>
                             </div>
@@ -730,7 +820,7 @@ Docplanner Support Team`,
                                 <div className="bg-white rounded-xl shadow p-6">
                                     <h3 className="font-semibold text-gray-800 mb-4">Expansion Triggers</h3>
                                     <div className="space-y-2">
-                                        {Object.entries(scenarioData.classification.triggers).map(([key, value]) => (
+                                        {Object.entries(classification.triggers || scenarioData.classification.triggers).map(([key, value]) => (
                                             <div key={key} className="flex items-center justify-between text-sm">
                                                 <span className="text-gray-600">{key.replace(/_/g, ' ')}</span>
                                                 <span className={value ? 'text-emerald-600' : 'text-gray-400'}>{value ? '✓' : '✗'}</span>
@@ -740,7 +830,7 @@ Docplanner Support Team`,
                                     <div className="mt-4 pt-4 border-t">
                                         <div className="flex justify-between items-center">
                                             <span className="font-medium">Triggers Met</span>
-                                            <span className="font-bold text-emerald-600">{scenarioData.classification.triggers_met}/{scenarioData.classification.triggers_total}</span>
+                                            <span className="font-bold text-emerald-600">{classification.triggers_met || scenarioData.classification.triggers_met}/{classification.triggers_total || scenarioData.classification.triggers_total}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -817,7 +907,7 @@ Docplanner Support Team`,
             </div>
         );
 
-        const LeadDetailView = ({ lead, scenario, onBack, onConvert }) => {
+        const LeadDetailView = ({ lead, scenario, onBack, onConvert, userMessage }) => {
             const scenarioData = scenario ? scenarios[scenario] : null;
             
             return (
@@ -864,15 +954,17 @@ Docplanner Support Team`,
                                 </div>
                             </div>
 
-                            {scenarioData && (
-                                <div className="bg-white rounded-xl shadow p-6">
-                                    <h3 className="font-semibold text-gray-800 mb-4">Original Support Request</h3>
-                                    <div className="bg-gray-50 rounded-lg p-4 text-gray-700">
-                                        {scenario === 'small_clinic' && "Hello, I'm trying to do a video call with a patient but I can't find the button anywhere. Can you help me?"}
-                                        {scenario === 'enterprise' && "We need telemedicine capabilities for our hospital. We have 127 practitioners across multiple departments and need integration with our systems."}
-                                    </div>
+                            <div className="bg-white rounded-xl shadow p-6">
+                                <h3 className="font-semibold text-gray-800 mb-4">Original Support Request</h3>
+                                <div className="bg-gray-50 rounded-lg p-4 text-gray-700">
+                                    {userMessage || (
+                                        <>
+                                            {scenario === 'small_clinic' && "Hello, I'm trying to do a video call with a patient but I can't find the button anywhere. Can you help me?"}
+                                            {scenario === 'enterprise' && "We need telemedicine capabilities for our hospital. We have 127 practitioners across multiple departments and need integration with our systems."}
+                                        </>
+                                    )}
                                 </div>
-                            )}
+                            </div>
                         </div>
 
                         <div className="space-y-6">
@@ -968,12 +1060,17 @@ Docplanner Support Team`,
             const [createdLeadIds, setCreatedLeadIds] = useState([]);
             const [liveClassification, setLiveClassification] = useState(null);
             const [apiMode, setApiMode] = useState('live'); // 'live' or 'fallback'
+            const [extractedPractitioners, setExtractedPractitioners] = useState(null);
 
             // Handle chat submission - NOW WITH LIVE API
             const handleChatSubmit = async (message) => {
                 setUserMessage(message);
                 setStage('processing');
                 setProcessingStage('receiving');
+                
+                // Extract practitioners from message
+                const practitioners = extractPractitioners(message);
+                setExtractedPractitioners(practitioners);
 
                 // Start processing animation
                 const stages = ['receiving', 'analyzing', 'classifying', 'evaluating', 'generating', 'routing', 'complete'];
@@ -1176,6 +1273,7 @@ Docplanner Support Team`,
                 setCurrentView('cases');
                 setLiveClassification(null);
                 setApiMode('live');
+                setExtractedPractitioners(null);
             };
 
             return (
@@ -1291,6 +1389,9 @@ Docplanner Support Team`,
                                             setCurrentView('leads');
                                         }
                                     }}
+                                    userMessage={userMessage}
+                                    extractedPractitioners={extractedPractitioners}
+                                    liveClassification={liveClassification}
                                 />
                             )}
 
@@ -1309,6 +1410,7 @@ Docplanner Support Team`,
                                     scenario={selectedLead.clinic === scenarios[currentScenario]?.clinicName ? currentScenario : null}
                                     onBack={() => setSelectedLead(null)}
                                     onConvert={() => handleConvertLead(selectedLead)}
+                                    userMessage={userMessage}
                                 />
                             )}
 
